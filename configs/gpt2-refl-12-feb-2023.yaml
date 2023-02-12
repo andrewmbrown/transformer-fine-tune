@@ -1,11 +1,11 @@
 ---
- model_name: gpt2-small
+ model_name: gpt2
  pretrained: /
 
  data_train_path: ../data/reflection-triplets/combined_triplet_train.csv
  data_validation_path: ../data/reflection-triplets/combined_triplet_validation.csv
- output_data_dir: ../model_save/
- output_model_dir: ../../Output/model/gpt2-xl-combined
+ output_data_dir: ../models
+ output_model_dir: ../models
  
  s3_prefix: samples/datasets/finetunedata-v1
  default_bucket: finetuning-temps
@@ -16,14 +16,17 @@
 
     find_hyperparams_automatically: false 
     num_trials: 10
-    fp16: true 
-    deepspeed: true 
+    fp16: true
+    deepspeed: true
     grad_accumulation_steps: 2
     eval_batch_size: 1
-    learning_rate: 3e-06
-    epochs: 1
-    train_batch_size: 1
-    seed: 1
+    learning_rate: 5e-4
+    epochs: 10
+    warmup_steps: 1e2
+    epsilon: 1e-8
+    batch_size: 2
+    sample_every: 100
+    seed: 42
     eval_steps: 10
     weight_decay: 1e-02
 

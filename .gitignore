@@ -10,3 +10,6 @@ data/*
 models/*
 # exception to the rule so we stil have the folder
 !models/.gitkeep
+
+# ignore wandb files
+/wandb
