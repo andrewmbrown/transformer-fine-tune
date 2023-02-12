@@ -1,3 +1,7 @@
 .DS_Store
 .ipynb_checkpoints
 
+# exclude everything in data folder
+data/*
+# exception to the rule so we stil have the folder
+!data/.gitkeep 
