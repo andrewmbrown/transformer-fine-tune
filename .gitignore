@@ -5,3 +5,8 @@
 data/*
 # exception to the rule so we stil have the folder
 !data/.gitkeep 
+
+# exclude everything in models folder
+models/*
+# exception to the rule so we stil have the folder
+!models/.gitkeep
