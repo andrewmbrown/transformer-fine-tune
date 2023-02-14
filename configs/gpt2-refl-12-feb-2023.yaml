@@ -20,11 +20,11 @@
     deepspeed: true
     grad_accumulation_steps: 2
     eval_batch_size: 1
-    learning_rate: 5e-4
-    epochs: 10
+    learning_rate: 2e-4
+    epochs: 15
     warmup_steps: 1e2
     epsilon: 1e-8
-    batch_size: 2
+    batch_size: 3
     sample_every: 100
     seed: 42
     eval_steps: 10
