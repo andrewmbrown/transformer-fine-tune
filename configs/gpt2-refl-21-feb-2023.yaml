@@ -1,5 +1,5 @@
 ---
- model_name: gpt2-xl
+ model_name: gpt2
  pretrained: /
 
  data_train_path: ../data/reflection-triplets/combined_triplet_train.csv
@@ -21,7 +21,7 @@
     grad_accumulation_steps: 2
     eval_batch_size: 1
     learning_rate: 3e-04
-    epochs: 3
+    epochs: 1
     warmup_steps: 1e2
     epsilon: 3e-8
     batch_size: 1
