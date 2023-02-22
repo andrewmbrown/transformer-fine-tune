@@ -1,44 +1,36 @@
----
- model_name: gpt2
- pretrained: /
-
- data_train_path: ../data/reflection-triplets/combined_triplet_train.csv
- data_validation_path: ../data/reflection-triplets/combined_triplet_validation.csv
- output_data_dir: ../models
- output_model_dir: ../models
- 
- s3_prefix: samples/datasets/finetunedata-v1
- default_bucket: finetuning-temps
-
- training_settings: 
-
-  hyperparameters: 
-
-    find_hyperparams_automatically: false 
+model_name: gpt2
+pretrained: /
+data_train_path: ../data/reflection-triplets/combined_triplet_train.csv
+data_validation_path: ../data/reflection-triplets/combined_triplet_validation.csv
+output_data_dir: ../models
+output_model_dir: ../models
+s3_prefix: samples/datasets/finetunedata-v1
+default_bucket: finetuning-temps
+training_settings:
+  hyperparameters:
+    find_hyperparams_automatically: false
     num_trials: 10
     fp16: true
     deepspeed: true
     grad_accumulation_steps: 2
     eval_batch_size: 1
-    learning_rate: 2e-4
+    learning_rate: 0.0002
     epochs: 15
-    warmup_steps: 1e2
-    epsilon: 1e-8
+    warmup_steps: 100
+    epsilon: 1.e-8
     batch_size: 3
     sample_every: 100
     seed: 42
     eval_steps: 10
-    weight_decay: 1e-02
-
+    weight_decay: 0.01
   deepspeed_settings:
-
     fp16:
       enabled: auto
       loss_scale: 0
       loss_scale_window: 1000
       initial_scale_power: 16
       hysteresis: 2
-      min_loss_scale: 1 
+      min_loss_scale: 1
     optimizer:
       type: AdamW
       params:
@@ -46,49 +38,44 @@
         betas: auto
         eps: auto
         weight_decay: auto
-    scheduler: 
+    scheduler:
       type: WarmupLR
       params:
-        warmup_min_lr: auto 
+        warmup_min_lr: auto
         warmup_max_lr: auto
         warmup_num_steps: auto
-    zero_optimization: 
+    zero_optimization:
       stage: 2
-      allgather_partitions: true 
+      allgather_partitions: true
       allgather_bucket_size: 200000000
-      overlap_comm: true 
-      reduce_scatter: true 
+      overlap_comm: true
+      reduce_scatter: true
       reduce_bucket_size: 200000000
-      contiguous_gradients: true 
+      contiguous_gradients: true
       cpu_offload: true
     gradient_accumulation_steps: auto
     gradient_clipping: auto
     steps_per_print: 20
     train_batch_size: auto
     train_micro_batch_size_per_gpu: auto
-    wall_clock_breakdown: false 
-
- use_dialog: false
- use_test_sample_file: true
- # I don't know where simple_triplet_test.csv is, not in repository
- test_sample_file_path: ../../trainingData/FineTuneSetSummer2022/simple_triplet_test.csv
- use_convo_history: false
- experiment_name: gpt2-xl-combined-single-primer
- test_model_name: gpt2-xl-combined-single-primer
- fttrained_model_path: ../../Output/model/gpt2-xl-combined
- save_results: true
- primer_path: ../../primers/single_primers.csv
- reflection_time_limit: 25
- num_shot: 1
- randomize_primer_question: false
- num_reflection_rounds: 1
- output_directory: ../../Output/test_results/
-
-
- refgen:
-
+    wall_clock_breakdown: false
+use_dialog: false
+use_test_sample_file: true
+test_sample_file_path: ../../trainingData/FineTuneSetSummer2022/simple_triplet_test.csv
+use_convo_history: false
+experiment_name: gpt2-xl-combined-single-primer
+test_model_name: gpt2-xl-combined-single-primer
+fttrained_model_path: ../../Output/model/gpt2-xl-combined
+save_results: true
+primer_path: ../../primers/single_primers.csv
+reflection_time_limit: 25
+num_shot: 1
+randomize_primer_question: false
+num_reflection_rounds: 1
+output_directory: ../../Output/test_results/
+refgen:
   temperature: 0.6
   repetition_penalty: 1.1
   do_sample: true
   top_k: 100
-  top_p: 1.0
+  top_p: 1
