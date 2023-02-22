@@ -76,6 +76,8 @@ output_directory: ../../Output/test_results/
 refgen:
   temperature: 0.6
   repetition_penalty: 1.1
+  max_length: 200
+  num_return_sequences: 1
   do_sample: true
-  top_k: 100
-  top_p: 1
+  top_k: 50
+  top_p: 0.95
