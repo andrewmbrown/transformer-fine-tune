@@ -23,6 +23,10 @@ from transformers import AdamW, get_linear_schedule_with_warmup
 from gpt2Dataset import GPT2Dataset
 
 
+def format_time(elapsed):
+    return str(datetime.timedelta(seconds=int(round((elapsed)))))
+
+
 def set_seed(args):
     """
     DESC:   Given seed value from args, set all the various pseudorandom seed
@@ -129,9 +133,9 @@ def preprocess_df(df):
     return triplets
 
 
-def load_tokenizer(args, config_dict):
+def init_tokenizer(args, config_dict):
     """
-    DESC:   Load tokenizer
+    DESC:   Initialize GPT2 tokenizer (byte-level BPE tokenizer)
     INPUT:  args (argparse.ArgumentParser)
             config_dict (dict) dictionary containing training configs
     OUTPUT: tokenizer (GPT2Tokenizer) tokenizer for GPT2 model
@@ -143,34 +147,34 @@ def load_tokenizer(args, config_dict):
     return tokenizer
 
 
-def load_dataset(args, config_dict, tokenizer, train_df, val_df):
+def load_dataset(args, config_dict, tokenizer, df, mode="Random"):
     """
-    DESC:   Load dataframes into GPT2Dataset objects (tokenized with len and getitem overrides)
+    DESC:   Load dataframe into GPT2Dataset objects (tokenized with len and getitem overrides)
             Then load into torch DataLoader objects (with sampler type and batch_size)
     INPUT:  args (argparse.ArgumentParser)
             config_dict (dict) dictionary containing training configs
             tokenizer (GPT2Tokenizer) tokenizer for GPT2 model
-            train_df (pd.DataFrame) dataframe containing training data
-            val_df (pd.DataFrame) dataframe containing validation data
-    OUTPUT: train_dataset (GPT2Dataset) dataset containing training data
+            df (pd.DataFrame) dataframe containing any data
+    OUTPUT: dataloader (GPT2Dataset) object containing any data
             val_dataset (GPT2Dataset) dataset containing validation data
     """
     assert config_dict['max_length'] is not None, "Please provide a max length for the dataset"
     assert tokenizer is not None, "Please provide a tokenizer" 
-    # Create custom dataset objects with the training and validation data
-    train_dataset = GPT2Dataset(train_df, tokenizer, config_dict['max_length'])
-    val_dataset = GPT2Dataset(val_df, tokenizer, config_dict['max_length'])
+    # Create custom dataset objects
+    dataset = GPT2Dataset(df, tokenizer, config_dict['max_length'])
     # Load datasets into torch DataLoader objects
-    # take training samples in random order
-    train_dataloader = DataLoader(train_dataset,
-                                sampler=RandomSampler(train_dataset),
-                                batch_size=config_dict['batch_size'])
-
-    # For validation, the order doesn't matter, so we read sequentially
-    validation_dataloader = DataLoader(val_dataset,
-                                    sampler=SequentialSampler(val_dataset),
-                                    batch_size=config_dict['batch_size'])
-    return train_dataloader, validation_dataloader
+    # take training samples in random order, for validation, sequential order (no shuffling needed))
+    if mode == "Random":
+        dataloader = DataLoader(dataset,
+                            sampler=RandomSampler(dataset),
+                            batch_size=config_dict['batch_size'])
+    elif mode == "Sequential":
+        dataloader = DataLoader(dataset,
+                            sampler=SequentialSampler(dataset),
+                            batch_size=config_dict['batch_size'])
+    else:
+        assert False, "Please provide a valid mode to create a DataLoader"
+    return dataloader
 
 
 def load_model(args, config_dict, tokenizer):
@@ -190,6 +194,222 @@ def load_model(args, config_dict, tokenizer):
     model.resize_token_embeddings(len(tokenizer))
     # move model to GPU (if available)
     model.to(args.device)
+    return model
+
+
+def load_optimizer(args, config_dict, model):
+    """
+    DESC:   Load optimizer (currently only AdamW) TODO: add other optimizers
+    INPUT:  args (argparse.ArgumentParser)
+            config_dict (dict) dictionary containing training configs
+            model (GPT2LMHeadModel) GPT2 model
+    OUTPUT: optimizer (AdamW) AdamW optimizer
+    """
+    # Note: AdamW is a class from the huggingface library (as opposed to pytorch) 
+    optimizer = AdamW(model.parameters(),
+                    lr = config_dict['learning_rate'],
+                    eps = config_dict['epsilon']
+                    )
+    return optimizer
+
+
+def init_scheduler(args, config_dict, optimizer, train_dataloader):
+    """
+    DESC:   Given optimizer and dataloader, init scheduler with warmup steps
+    INPUT:  args (argparse.ArgumentParser)
+            config_dict (dict) dictionary containing training configs
+            optimizer (torch.optim.xxx or transformers.xxx) optimizer
+            train_dataloader (torch.DataLoader) dataloader used to get number of training steps
+    OUTPUT: scheduler (get_linear_schedule_with_warmup) scheduler
+    """
+    # Scheduler uses warmup steps to avoid large learning rate at the beginning of training
+    # We need the total number of training steps to calculate the learning rate at each step
+    # Here we obtain it from the length of the dataloader and number of epochs
+    scheduler = get_linear_schedule_with_warmup(optimizer, 
+                                            num_warmup_steps = config_dict['num_warmup_steps'],
+                                            num_training_steps = len(train_dataloader)*config_dict['num_epochs'])
+    return scheduler
+
+
+def train_and_validate(args, config_dict, model, tokenizer, train_dataloader, val_dataloader, optimizer, scheduler):
+    """
+    DESC:   Train and validate huggingface LM
+    INPUT:  args (argparse.ArgumentParser)
+            config_dict (dict) dictionary containing training configs
+            model (GPT2LMHeadModel) untrained GPT2 model
+            tokenizer (GPT2Tokenizer) tokenizer for GPT2 model
+            train_dataloader (torch.DataLoader) dataloader containing training data
+            val_dataloader (torch.DataLoader) dataloader containing validation data
+            optimizer (torch.optim.xxx or transformers.xxx) optimizer
+            scheduler (get_linear_schedule_with_warmup) scheduler
+    OUTPUT: model (GPT2LMHeadModel) trained GPT2 model
+    """
+    # start global timer
+    total_t0 = time.time()
+
+    training_stats = []
+
+    # unpack some args and config params
+    device = args.device
+    epochs = config_dict['num_epochs']
+    sample_every = config_dict['sample_every']
+
+    model = model.to(device)
+
+    for epoch_i in range(0, epochs):
+        """
+        Training Loop
+        """
+        wandb.watch(model)
+        print(f"---Epoch {epoch_i + 1} of {epochs}---")
+        print("---Training...---")
+        
+        # start epoch timer
+        t0 = time.time()
+        
+        total_train_loss = 0
+
+        # sets model into train mode, not actual backprop
+        # dropout and batchnorm behave differently
+        # opposite of model.eval() for inference mode
+        model.train()
+        
+        for step, batch in enumerate(train_dataloader):
+            # grab input tokens, labels, and masks
+            input_tokens = batch[0].to(device)
+            # in this case, we're generating text,
+            # so label tokens are the input tokens shifted
+            label_tokens = batch[0].to(device)
+            attn_masks = batch[1].to(device)
+            
+            # clear any gradients from model tensors
+            # prevents any gradient accumulation
+            model.zero_grad()
+            
+            # forward pass
+            outputs = model(input_tokens,
+                            labels=label_tokens,
+                            attention_mask=attn_masks,
+                            token_type_ids=None
+                        )
+            
+            # grab loss from outputs
+            loss = outputs[0]
+            
+            batch_loss = loss.item()  # detach from device with item
+            total_train_loss += batch_loss
+            
+            # get sample every x batches
+            if step % sample_every == 0 and not step == 0:
+                # calculate elapsed time and print statistics
+                elapsed = format_time(time.time() - t0)
+                print('  Batch {:>5,}  of  {:>5,}. Loss: {:>5,}.   Elapsed: {:}.'.format(step, len(train_dataloader), batch_loss, elapsed))
+                
+                # set model to inference mode for testing
+                model.eval()
+                
+                # sample model with generate() using no tokens, just let it generate
+                sample_outputs = model.generate(bos_token_id=random.randint(1,30000),
+                                                do_sample=True,
+                                                top_k=50,
+                                                max_length=200,
+                                                top_p=0.95,
+                                                num_return_sequences=1
+                                            )
+                
+                for i, sample_output in enumerate(sample_outputs):
+                    out = tokenizer.decode(sample_output, skip_special_tokens=True)
+                    print(f"{i}: {out}")
+                
+                # back to train mode
+            
+            # backpropagation step
+            # computes dloss/dx for every parameter x which has requires_grad=True.
+            # updates gradient values
+            # x.grad += dloss/dx
+            loss.backward()
+            
+            # step optimizer
+            # updates the value of x using the gradient x.grad
+            # x += -lr * x.grad
+            optimizer.step()
+            
+            # step scheduler
+            # tells scheduler to increase learning rate
+            # using our warmup steps
+            scheduler.step()
+            
+        print("---Done Training Epoch!---")
+        # calculate average loss over all batches
+        avg_train_loss = total_train_loss / len(train_dataloader)
+        
+        # measure how long the epoch took
+        training_time = format_time(time.time() - t0)
+        
+        print(f"---Average training loss {avg_train_loss} ---")
+        print(f"---Training epoch took {training_time} ---")
+        
+        """
+        Validation
+        """
+        print("---Running Validation...---")
+        
+        # start batch timer
+        t0 = time.time()
+        
+        # set model to inference mode
+        model.eval()
+        
+        total_eval_loss = 0
+        nb_eval_steps = 0
+        
+        # evaluate data for one epoch
+        for batch in val_dataloader:
+            # grab input tokens, labels, and masks
+            input_tokens = batch[0].to(device)
+            # in this case, we're generating text,
+            # so label tokens are the input tokens shifted
+            label_tokens = batch[0].to(device)
+            attn_masks = batch[1].to(device)
+            
+            # freeze gradients
+            with torch.no_grad():
+                outputs = model(input_tokens,
+                                attention_mask=attn_masks,
+                                labels=label_tokens)
+                
+                loss = outputs[0]
+            
+            batch_loss = loss.item()
+            total_eval_loss += batch_loss
+            
+        avg_val_loss = total_eval_loss / len(val_dataloader)
+        validation_time = format_time(time.time() - t0)
+        
+        print(f"Validation Loss: {avg_val_loss}")
+        print(f"Validation took: {validation_time}")
+        
+        # save all training statistics from the epoch
+        training_stats.append(
+            {
+                'epoch': epoch_i + 1,
+                'Training Loss': avg_train_loss,
+                'Validation Loss': avg_val_loss,
+                'Training Time': training_time,
+                'Validation Time': validation_time
+            })
+        # log training data to wandb as well
+        wandb.log({
+                'epoch': epoch_i + 1,
+                'Training Loss': avg_train_loss,
+                'Validation Loss': avg_val_loss,
+                'Training Time': training_time,
+                'Validation Time': validation_time
+            })
+        
+
+    print("---Training Complete!")
+    print(f"---Total training time took {format_time(time.time()-total_t0)}")
     return model
 
 
