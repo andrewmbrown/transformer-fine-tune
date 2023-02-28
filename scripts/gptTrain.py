@@ -75,6 +75,32 @@ def load_yaml(args):
     return config_dict
 
 
+def init_wandb(args, config_dict):
+    """
+    DESC:   Initialize wandb for logging
+    INPUT:  args (argparse.ArgumentParser)
+            config_dict (dict) dictionary containing yaml file
+    OUTPUT: None
+    """
+    assert args.path_to_wandb_key is not None, "Please provide a path to wandb key"
+    # load wandb key
+    with open(args.path_to_wandb_key, "r") as stream:
+        try:
+            wandb_key = yaml.safe_load(stream)
+        except yaml.YAMLError as exc:
+            print("Wandb key load failed!")
+            print(exc)
+    # initialize wandb
+    wandb.login(key=wandb_key)
+    wandb.init(
+        project=config_dict["wandb_project_name"],
+        name=config_dict["wandb_run_name"],
+        notes=config_dict["wandb_notes"],
+        config=config_dict,
+        tags=config_dict["wandb_tags"])
+    return
+
+
 def load_train_and_validation_as_df(args, config_dict):
     """
     DESC:   Load train and validation data as pandas dataframes
@@ -146,6 +172,25 @@ def load_dataset(args, config_dict, tokenizer, train_df, val_df):
                                     batch_size=config_dict['batch_size'])
     return train_dataloader, validation_dataloader
 
+
+def load_model(args, config_dict, tokenizer):
+    """
+    DESC:   Load gpt2 configuration, then model
+    INPUT:  args (argparse.ArgumentParser)
+            config_dict (dict) dictionary containing training configs
+            tokenizer (GPT2Tokenizer) tokenizer for GPT2 model
+    OUTPUT: model (GPT2LMHeadModel) GPT2 model
+    """
+    assert config_dict['model_name'] is not None, "Please provide a model name"
+    # Load GPT2 configuration
+    config = GPT2Config.from_pretrained(config_dict['model_name'], output_hidden_states=False)
+    # instantiate model
+    model = GPT2LMHeadModel.from_pretrained(config_dict['model_name'], config=config)
+    # resize token embeddings for our custom tokens
+    model.resize_token_embeddings(len(tokenizer))
+    # move model to GPU (if available)
+    model.to(args.device)
+    return model
 
 
 def main():
