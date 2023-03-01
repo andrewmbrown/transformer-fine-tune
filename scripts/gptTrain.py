@@ -147,7 +147,7 @@ def init_tokenizer(args, config_dict):
     return tokenizer
 
 
-def load_dataset(args, config_dict, tokenizer, df, mode="Random"):
+def init_dataloader(args, config_dict, tokenizer, df, mode="Random"):
     """
     DESC:   Load dataframe into GPT2Dataset objects (tokenized with len and getitem overrides)
             Then load into torch DataLoader objects (with sampler type and batch_size)
@@ -177,7 +177,7 @@ def load_dataset(args, config_dict, tokenizer, df, mode="Random"):
     return dataloader
 
 
-def load_model(args, config_dict, tokenizer):
+def init_model(args, config_dict, tokenizer):
     """
     DESC:   Load gpt2 configuration, then model
     INPUT:  args (argparse.ArgumentParser)
@@ -413,27 +413,42 @@ def train_and_validate(args, config_dict, model, tokenizer, train_dataloader, va
     return model
 
 
+
+
 def main(args):
     # GPT2 Fine-tuning pipeline
     # --- Load yaml using args.config
     config_dict = load_config(args)
-    # --- Preprocess data
-
+    # --- Load and Preprocess data
+    train_df, val_df = load_train_and_validation_as_df(args, config_dict)
+    train_df = preprocess_df(train_df)
+    val_df = preprocess_df(val_df)
     # --- Initialize tokenizer
+    tokenizer = init_tokenizer(args, config_dict)
     # --- Initialize model
+    model = init_model(args, config_dict, tokenizer)
     # --- Initialize optimizer
+    optimizer = load_optimizer(args, config_dict, model)
     # --- Initialize scheduler
+    scheduler = init_scheduler(args, config_dict, optimizer)
     # --- Initialize dataloaders
+    train_dataloader = init_dataloader(args, config_dict, tokenizer, train_df, mode="Random")
+    val_dataloader = init_dataloader(args, config_dict, tokenizer, train_df, mode="Sequential")
+    # --- Initialize wandb
+    init_wandb(args, config_dict)
     # --- Train model
+    model = train_and_validate(args, config_dict, model, tokenizer, train_dataloader, val_dataloader, optimizer, scheduler)
     # --- Save model
 
 
 if __name__ == "__main__":
     # --- Instantiate Argument Parser ---
-    # path_to_data, 
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config", help="Path to configuration YAML file", required=True)
+    parser.add_argument("-t", "--path_to_train_data", help="Path to training data", required=False)
+    parser.add_argument("-v", "--path_to_val_data", help="Path to validation data", required=False)
+    parser.add_argument("-w", "--path_to_wandb_key", help="Path to wandb login key", required=False)
 
-    global args
+    global args  # set global args scope potential for gpu diagnostics
     args = argparse.parse_args()
     main(args)
