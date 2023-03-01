@@ -62,15 +62,15 @@ def check_cuda(args):
     return is_cuda
 
 
-def load_yaml(args):
+def load_config(args):
     """
     DESC:   Load yaml config file for training params
     INPUT:  args (argparse.ArgumentParser)
     OUTPUT: config_dict (dict) dictionary containing yaml file
     """
-    assert args.path_to_config is not None, "Please provide a path to yaml config file"
+    assert args.config is not None, "Please provide a path to yaml config file"
     # open yaml config as a strema and load into config_dict
-    with open(args.path_to_config, "r") as stream:
+    with open(args.config, "r") as stream:
         try:
             config_dict = yaml.safe_load(stream)
         except yaml.YAMLError as exc:
@@ -413,14 +413,27 @@ def train_and_validate(args, config_dict, model, tokenizer, train_dataloader, va
     return model
 
 
-def main():
-    # --- Instantiate Argument Parser ---
-    # path_to_data, 
-    parser = argparse.ArgumentParser()
-    global args
-    args = argparse.parse_args()
+def main(args):
+    # GPT2 Fine-tuning pipeline
+    # --- Load yaml using args.config
+    config_dict = load_config(args)
+    # --- Preprocess data
 
+    # --- Initialize tokenizer
+    # --- Initialize model
+    # --- Initialize optimizer
+    # --- Initialize scheduler
+    # --- Initialize dataloaders
+    # --- Train model
+    # --- Save model
 
 
 if __name__ == "__main__":
-    main()
+    # --- Instantiate Argument Parser ---
+    # path_to_data, 
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-c", "--config", help="Path to configuration YAML file", required=True)
+
+    global args
+    args = argparse.parse_args()
+    main(args)
