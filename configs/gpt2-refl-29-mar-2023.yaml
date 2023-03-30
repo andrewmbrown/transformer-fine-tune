@@ -1,7 +1,7 @@
 model_name: gpt2-medium
 pretrained: /
-data_train_path: ../data/reflection-triplets/combined_triplet_train.csv
-data_validation_path: ../data/reflection-triplets/combined_triplet_validation.csv
+data_train_path: ../data/reflection-triplets/complete_reflection_triplets.csv
+data_validation_path: ../data/reflection-triplets/complete_validation_reflection_triplets.csv
 output_data_dir: ../models
 output_model_dir: ../models
 s3_prefix: samples/datasets/finetunedata-v1
@@ -14,7 +14,7 @@ training_settings:
     deepspeed: true
     grad_accumulation_steps: 2
     eval_batch_size: 1
-    learning_rate: 0.050793350306270954
+    learning_rate: 0.0003
     epochs: 10
     warmup_steps: 100
     epsilon: 1e-7
