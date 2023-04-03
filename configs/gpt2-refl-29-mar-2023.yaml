@@ -18,7 +18,7 @@ training_settings:
     epochs: 10
     warmup_steps: 100
     epsilon: 1e-7
-    batch_size: 2
+    batch_size: 1
     sample_every: 100
     seed: 42
     eval_steps: 10
