@@ -21,10 +21,11 @@ from transformers import GPT2LMHeadModel, GPT2Tokenizer, GPT2Config, GPT2LMHeadM
 from transformers import AdamW, get_linear_schedule_with_warmup
 
 
-def set_seed(args):
+def set_seed(args, config_dict):
     """
-    DESC: Given seed value from args, set all the various pseudorandom seed
-    INPUT: args (argparse.ArgumentParser)
+    DESC:   Given seed value from args, set all the various pseudorandom seed
+    INPUT:  args (argparse.ArgumentParser)
+            config_dict (dict) dictionary containing yaml file
     OUTPUT: None
     """
     assert args.seed is not None, "Please provide a seed value"
@@ -33,6 +34,10 @@ def set_seed(args):
     torch.manual_seed(args.seed)
     if args.n_gpu > 0:
         torch.cuda.manual_seed_all(args.seed)
+
+
+def format_time(elapsed):
+    return str(datetime.timedelta(seconds=int(round((elapsed)))))
 
 
 def check_cuda(args):
@@ -54,6 +59,43 @@ def check_cuda(args):
         args.cuda = False
         print("CUDA is not available. CPU will be used.")
     return is_cuda
+
+def print_gpu_utilization():
+    """
+    DESC: Check gpu utilization, currently for only one device
+    INPUT: None
+    OUTPUT: None (prints gpu diagnostic)
+    """
+    nvmlInit()
+    handle = nvmlDeviceGetHandleByIndex(0)
+    info = nvmlDeviceGetMemoryInfo(handle)
+    print(f"GPU memory occupied: {info.used//1024**2} MB.")
+
+
+def init_wandb(args, config_dict):
+    """
+    DESC:   Initialize wandb for logging
+    INPUT:  args (argparse.ArgumentParser)
+            config_dict (dict) dictionary containing yaml file
+    OUTPUT: None
+    """
+    assert args.path_to_wandb_key is not None, "Please provide a path to wandb key"
+    # load wandb key
+    with open(args.path_to_wandb_key, "r") as stream:
+        try:
+            wandb_key = yaml.safe_load(stream)
+        except yaml.YAMLError as exc:
+            print("Wandb key load failed!")
+            print(exc)
+    # initialize wandb
+    wandb.login(key=wandb_key)
+    wandb.init(
+        project=config_dict["wandb_project_name"],
+        name=config_dict["wandb_run_name"],
+        notes=config_dict["wandb_notes"],
+        config=config_dict,
+        tags=config_dict["wandb_tags"])
+    return
 
 
 def main():
