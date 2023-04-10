@@ -1,4 +1,4 @@
-model_name: gpt2-large
+model_name: gpt2-xl
 pretrained: /
 data_train_path: ../data/reflection-triplets/complete_reflection_triplets.csv
 data_validation_path: ../data/reflection-triplets/complete_validation_reflection_triplets.csv

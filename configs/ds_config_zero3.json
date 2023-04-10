@@ -9,6 +9,7 @@
     },
 
     "optimizer": {
+        "zero_allow_untested_optimizer": true,
         "type": "AdamW",
         "params": {
             "lr": "auto",
@@ -30,7 +31,7 @@
     "zero_optimization": {
         "stage": 3,
         "offload_optimizer": {
-            "device": "cpu",
+            "device": "none",
             "pin_memory": true
         },
         "offload_param": {
