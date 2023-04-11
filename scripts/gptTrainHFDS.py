@@ -26,25 +26,7 @@ from pynvml import *
 import nvidia_smi
 
 # --- Custom File Imports ---
-from gpt2Dataset import GPT2Dataset
 from trainingUtils import *
-
-
-def load_config(args):
-    """
-    DESC:   Load yaml config file for training params
-    INPUT:  args (argparse.ArgumentParser)
-    OUTPUT: config_dict (dict) dictionary containing yaml file
-    """
-    assert args.config is not None, "ERROR: Please provide a path to yaml config file"
-    # open yaml config as a strema and load into config_dict
-    with open(args.config, "r") as stream:
-        try:
-            config_dict = yaml.safe_load(stream)
-        except yaml.YAMLError as exc:
-            print("Configuration load failed!")
-            print(exc)
-    return config_dict
 
 
 def load_raw_train_validation_datasets(args, config_dict):
@@ -273,8 +255,7 @@ def main(args):
     # --- Initialize trainer
     trainer = init_trainer(args, config_dict, model, tokenizer, tokenized_datasets)
     # --- Initialize wandb
-    if args.wandb_key:
-        init_wandb(args, config_dict)
+    init_wandb(args, config_dict)
 
     # --- Set Seed
     set_seed(args, config_dict)
@@ -292,5 +273,5 @@ if __name__ == "__main__":
     parser.add_argument("-w", "--wandb_key", help="Wandb key for logging training stats", required=False)
 
     global args  # set global args scope potential for gpu diagnostics
-    args = argparse.parse_args()
+    args = parser.parse_args()
     main(args)

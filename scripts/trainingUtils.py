@@ -13,12 +13,29 @@ import seaborn as sns
 from tqdm import tqdm, trange
 import matplotlib.pyplot as plt
 
-
-# --- Machine Learning Imports ---
+# --- PyTorch Imports ---
 import torch
-from torch.utils.data import Dataset, DataLoader, random_split, RandomSampler, SequentialSampler
-from transformers import GPT2LMHeadModel, GPT2Tokenizer, GPT2Config, GPT2LMHeadModel
-from transformers import AdamW, get_linear_schedule_with_warmup
+
+# --- Memory Management Imports ---
+from pynvml import *
+import nvidia_smi
+
+
+def load_config(args):
+    """
+    DESC:   Load yaml config file for training params
+    INPUT:  args (argparse.ArgumentParser)
+    OUTPUT: config_dict (dict) dictionary containing yaml file
+    """
+    assert args.config is not None, "ERROR: Please provide a path to yaml config file"
+    # open yaml config as a strema and load into config_dict
+    with open(args.config, "r") as stream:
+        try:
+            config_dict = yaml.safe_load(stream)
+        except yaml.YAMLError as exc:
+            print("Configuration load failed!")
+            print(exc)
+    return config_dict
 
 
 def set_seed(args, config_dict):
@@ -28,7 +45,7 @@ def set_seed(args, config_dict):
             config_dict (dict) dictionary containing yaml file
     OUTPUT: None
     """
-    assert args.seed is not None, "Please provide a seed value"
+    assert args.seed is not None, "ERROR: Please provide a seed value"
     random.seed(args.seed)
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
@@ -84,7 +101,6 @@ def init_wandb(args, config_dict):
             wandb.login(key=args.wandb_key)
             wandb.init(
                 project=config_dict["wandb_project_name"],
-                name=config_dict["wandb_run_name"],
                 notes=config_dict["wandb_notes"],
                 config=config_dict,
                 tags=config_dict["wandb_tags"])
