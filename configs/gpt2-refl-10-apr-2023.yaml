@@ -1,9 +1,10 @@
-model_name: gpt2-xl
+model_name: gpt2
 pretrained: /
 data_train_path: ../data/reflection-triplets/complete_reflection_triplets.csv
 data_validation_path: ../data/reflection-triplets/complete_validation_reflection_triplets.csv
 output_data_dir: ../models
 output_model_dir: ../models
+path_to_deepspeed_config: ../configs/ds_config_zero2.json
 
 hyperparameters:
   find_hyperparams_automatically: false
@@ -13,7 +14,7 @@ hyperparameters:
   grad_accumulation_steps: 2
   eval_batch_size: 1
   learning_rate: 0.0003
-  epochs: 10
+  epochs: 1
   warmup_steps: 100
   epsilon: 1e-7
   batch_size: 1

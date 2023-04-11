@@ -140,19 +140,31 @@ def certify_training_config(args, config_dict):
     OUTPUT: None
     """
     print("Checking that all required training configs are present...")
+
+    # asserts for necessary training config arguments
     assert config_dict['model_name'] is not None, "ERROR: Please provide a model name"
     assert config_dict['output_model_dir'] is not None, "ERROR: Please provide an output model directory"
     assert config_dict['hyperparameters']["learning_rate"] is not None, "ERROR: Please provide a learning rate"
     assert config_dict['hyperparameters']["epochs"] is not None, "ERROR: Please provide a number of epochs"
-    assert config_dict['num_warmup_steps'] is not None, "ERROR: Please provide a number of warmup steps"
-    assert config_dict['batch_size'] is not None, "ERROR: Please provide a batch size"
+    assert config_dict['hyperparameters']['warmup_steps'] is not None, "ERROR: Please provide a number of warmup steps"
+    assert config_dict['hyperparameters']['batch_size'] is not None, "ERROR: Please provide a batch size"
+
+    # argparser flags for training saving options
     if args.save_model == False:
-        print("WARNING: You have not specified False to saving model. Your model will not be saved.")
+        print("WARNING: You have specified False to saving model. Your model will not be saved.")
+    else:
+        print(f"Saving model to: {os.path.abspath(config_dict['output_model_dir'])}")
     if args.save_tokenizer == False:
-        print("WARNING: You have not specified False to saving tokenizer. Your tokenizer will not be saved.")
-    if args.save_training_args == False:
-        print("WARNING: You have not specified False to saving training args. Your training args will not be saved.")
+        print("WARNING: You have specified False to saving tokenizer. Your tokenizer will not be saved.")
+    else:
+        print(f"Saving tokenizer to: {os.path.abspath(config_dict['output_model_dir'])}")
+    if args.save_arguments == False:
+        print("WARNING: You have specified False to saving training args. Your training args will not be saved.")
+    else:
+        print(f"Saving training arguments and config to: {os.path.abspath(config_dict['output_model_dir'])}")
+
     print("All required training configs are present!")
+    return
     
 
 def init_trainer(args, config_dict, model, tokenizer, tokenized_datasets):
@@ -170,7 +182,7 @@ def init_trainer(args, config_dict, model, tokenizer, tokenized_datasets):
     # define training args
     training_args = TrainingArguments(output_dir=config_dict['output_model_dir'],
                                     overwrite_output_dir=True,
-                                    deepspeed=args.path_to_deepspeed_config,
+                                    deepspeed=config_dict['path_to_deepspeed_config'],
                                     evaluation_strategy = "steps", # used to be epoch
                                     prediction_loss_only = True, #get rid of this if we end up adding metrics
                                     logging_dir=f"./logs/",
@@ -256,7 +268,6 @@ def main(args):
     trainer = init_trainer(args, config_dict, model, tokenizer, tokenized_datasets)
     # --- Initialize wandb
     init_wandb(args, config_dict)
-
     # --- Set Seed
     set_seed(args, config_dict)
     # --- Train model and save
@@ -267,9 +278,9 @@ if __name__ == "__main__":
     # --- Instantiate Argument Parser ---
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config", help="Path to configuration YAML file", required=True)
-    parser.add_argument("-sm", "--savemodel", help="Option - save model after training", required=True)
-    parser.add_argument("-st", "--savetokenizer", help="Option - save tokenizer after training", required=True)
-    parser.add_argument("-sa", "--savearguments", help="Option - save training arguments and config", required=True)
+    parser.add_argument("-sm", "--save_model", help="Option - save model after training", required=True)
+    parser.add_argument("-st", "--save_tokenizer", help="Option - save tokenizer after training", required=True)
+    parser.add_argument("-sa", "--save_arguments", help="Option - save training arguments and config", required=True)
     parser.add_argument("-w", "--wandb_key", help="Wandb key for logging training stats", required=False)
 
     global args  # set global args scope potential for gpu diagnostics

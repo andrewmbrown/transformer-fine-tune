@@ -45,12 +45,14 @@ def set_seed(args, config_dict):
             config_dict (dict) dictionary containing yaml file
     OUTPUT: None
     """
-    assert args.seed is not None, "ERROR: Please provide a seed value"
-    random.seed(args.seed)
-    np.random.seed(args.seed)
-    torch.manual_seed(args.seed)
+    assert config_dict['hyperparameters']['seed'] is not None, "ERROR: Please provide a seed value"
+    random.seed(config_dict['hyperparameters']['seed'])
+    np.random.seed(config_dict['hyperparameters']['seed'])
+    torch.manual_seed(config_dict['hyperparameters']['seed'])
     if args.n_gpu > 0:
-        torch.cuda.manual_seed_all(args.seed)
+        torch.cuda.manual_seed_all(config_dict['hyperparameters']['seed'])
+    print(f"Set all seeds to {config_dict['hyperparameters']['seed']}")
+    return
 
 
 def format_time(elapsed):
@@ -104,6 +106,7 @@ def init_wandb(args, config_dict):
                 notes=config_dict["wandb_notes"],
                 config=config_dict,
                 tags=config_dict["wandb_tags"])
+            print("wanbd login and init successful, logging run!")
         except:
             print("WARNING: wandb key provided is invalid. Wandb will not be used.")
     else:
