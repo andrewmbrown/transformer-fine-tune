@@ -3,7 +3,9 @@ pretrained: /
 data_train_path: ../data/reflection-triplets/complete_reflection_triplets.csv
 data_validation_path: ../data/reflection-triplets/complete_validation_reflection_triplets.csv
 output_data_dir: ../models
-output_model_dir: ../models
+output_model_dir: ../models/gpt2-xl-mi-reflector
+output_tokenizer_dir: ../models/gpt2-xl-mi-reflector
+output_training_args_dir: ../models/gpt2-xl-mi-reflector/training-args
 path_to_deepspeed_config: ../configs/ds_config_zero2.json
 
 hyperparameters:

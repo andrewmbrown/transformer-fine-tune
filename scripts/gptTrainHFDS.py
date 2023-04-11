@@ -157,11 +157,11 @@ def certify_training_config(args, config_dict):
     if args.save_tokenizer == False:
         print("WARNING: You have specified False to saving tokenizer. Your tokenizer will not be saved.")
     else:
-        print(f"Saving tokenizer to: {os.path.abspath(config_dict['output_model_dir'])}")
+        print(f"Saving tokenizer to: {os.path.abspath(config_dict['output_tokenizer_dir'])}")
     if args.save_arguments == False:
         print("WARNING: You have specified False to saving training args. Your training args will not be saved.")
     else:
-        print(f"Saving training arguments and config to: {os.path.abspath(config_dict['output_model_dir'])}")
+        print(f"Saving training arguments and config to: {os.path.abspath(config_dict['output_training_args_dir'])}")
 
     print("All required training configs are present!")
     return
@@ -223,17 +223,25 @@ def train_and_save_model(args, config_dict, trainer):
 
     # depending on args, save model, tokenizer, training args, and training config
     if args.save_model:
+        # create output saving directory if needed
+        if not os.path.exists(config_dict['output_model_dir']):
+            os.makedirs(config_dict['output_model_dir'])
         # save model
         trainer.save_model(config_dict['output_model_dir'])
+        
     if args.save_tokenizer:
+        # create output saving directory if needed
+        if not os.path.exists(config_dict['output_tokenizer_dir']):
+            os.makedirs(config_dict['output_tokenizer_dir'])
         # save tokenizer
-        trainer.tokenizer.save_pretrained(config_dict['output_model_dir'])
+        trainer.tokenizer.save_pretrained(config_dict['output_tokenizer_dir'])
     
-    if args.save_training_args:
-        # save training arguments
-        trainer.save_args(config_dict['output_model_dir'])
+    if args.save_arguments:
+        # create output saving directory if needed
+        if not os.path.exists(config_dict['output_training_args_dir']):
+            os.makedirs(config_dict['output_training_args_dir'])
         # save training config
-        with open(os.path.join(config_dict['output_model_dir'], 'training_config.yaml'), 'w') as f:
+        with open(os.path.join(config_dict['output_training_args_dir'], 'training_config.yaml'), 'w') as f:
             yaml.dump(config_dict, f, default_flow_style=False)
     return
 
@@ -272,6 +280,7 @@ def main(args):
     set_seed(args, config_dict)
     # --- Train model and save
     train_and_save_model(args, config_dict, trainer)
+    return
 
 
 if __name__ == "__main__":
