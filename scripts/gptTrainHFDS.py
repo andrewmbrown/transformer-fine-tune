@@ -105,6 +105,7 @@ def init_model(args, config_dict, tokenizer):
     OUTPUT: model (GPT2LMHeadModel) GPT2 model
     """
     assert config_dict['model_name'] is not None, "ERROR: Please provide a model name"
+    assert args.device is not None, "ERROR: Please provide a device (cpu/gpu/etc) to mount model"
     # Load GPT2 configuration
     config = GPT2Config.from_pretrained(config_dict['model_name'], output_hidden_states=False)
     # instantiate model
@@ -272,10 +273,8 @@ def main(args):
     # --- Initialize trainer
     trainer = init_trainer(args, config_dict, model, tokenizer, tokenized_datasets)
     # --- Initialize wandb
-    if args.use_wandb:
+    if args.wandb_key:
         init_wandb(args, config_dict)
-    else:
-        print("Not logging to wandb!")
 
     # --- Set Seed
     set_seed(args, config_dict)
@@ -287,9 +286,10 @@ if __name__ == "__main__":
     # --- Instantiate Argument Parser ---
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config", help="Path to configuration YAML file", required=True)
-    parser.add_argument("-t", "--path_to_train_data", help="Path to training data", required=False)
-    parser.add_argument("-v", "--path_to_val_data", help="Path to validation data", required=False)
-    parser.add_argument("-w", "--path_to_wandb_key", help="Path to wandb login key", required=False)
+    parser.add_argument("-sm", "--savemodel", help="Option - save model after training", required=True)
+    parser.add_argument("-st", "--savetokenizer", help="Option - save tokenizer after training", required=True)
+    parser.add_argument("-sa", "--savearguments", help="Option - save training arguments and config", required=True)
+    parser.add_argument("-w", "--wandb_key", help="Wandb key for logging training stats", required=False)
 
     global args  # set global args scope potential for gpu diagnostics
     args = argparse.parse_args()
