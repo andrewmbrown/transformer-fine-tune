@@ -79,22 +79,19 @@ def init_wandb(args, config_dict):
             config_dict (dict) dictionary containing yaml file
     OUTPUT: None
     """
-    assert args.path_to_wandb_key is not None, "Please provide a path to wandb key"
-    # load wandb key
-    with open(args.path_to_wandb_key, "r") as stream:
+    if args.wandb_key:
         try:
-            wandb_key = yaml.safe_load(stream)
-        except yaml.YAMLError as exc:
-            print("Wandb key load failed!")
-            print(exc)
-    # initialize wandb
-    wandb.login(key=wandb_key)
-    wandb.init(
-        project=config_dict["wandb_project_name"],
-        name=config_dict["wandb_run_name"],
-        notes=config_dict["wandb_notes"],
-        config=config_dict,
-        tags=config_dict["wandb_tags"])
+            wandb.login(key=args.wandb_key)
+            wandb.init(
+                project=config_dict["wandb_project_name"],
+                name=config_dict["wandb_run_name"],
+                notes=config_dict["wandb_notes"],
+                config=config_dict,
+                tags=config_dict["wandb_tags"])
+        except:
+            print("WARNING: wandb key provided is invalid. Wandb will not be used.")
+    else:
+        print("WARNING: No wandb key provided. Wandb will not be used.")
     return
 
 
