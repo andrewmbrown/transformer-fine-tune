@@ -22,6 +22,12 @@ hyperparameters:
   eval_steps: 10
   weight_decay: 0.01
 
+wandb_project_name: gpt2-xl-reflector
+wandb_notes: Using DeepSpeed to train gpt2-xl
+wandb_tags: [
+  GPT2Family, gpt2-xl, reflector, DeepSpeed, Multi-GPU
+]
+
 output_directory: ../../Output/test_results/
 refgen:
   temperature: 0.6
