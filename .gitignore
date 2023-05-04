@@ -1,5 +1,6 @@
 .DS_Store
 .ipynb_checkpoints
+.vscode/
 
 # exclude everything in data folder
 data/*
