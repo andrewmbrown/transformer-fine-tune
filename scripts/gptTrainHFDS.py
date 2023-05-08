@@ -20,6 +20,7 @@ from torch.utils.data import Dataset, DataLoader, random_split, RandomSampler, S
 from transformers import Trainer, TrainingArguments, GPT2LMHeadModel, GPT2Tokenizer, GPT2Config, GPT2LMHeadModel
 from transformers import AdamW, get_linear_schedule_with_warmup, DataCollatorForLanguageModeling
 from datasets import load_dataset
+from datasets import Dataset
 
 # Memory Management Imports
 from pynvml import *
@@ -38,9 +39,11 @@ def load_raw_train_validation_datasets(args, config_dict):
     """
     assert config_dict['data_train_path'] is not None, "ERROR: Please provide a path to training data"
     assert config_dict['data_validation_path'] is not None, "ERROR: Please provide a path to validation data"
-    raw_datasets = load_dataset('csv', data_files=config_dict['data_train_path'])
-    raw_datasets["validation"] = (load_dataset('csv', data_files=config_dict['data_validation_path']))["train"]
-    return raw_datasets
+    df = pd.read_csv(config_dict["data_train_path"])
+    df_val = pd.read_csv(config_dict["data_validation_path"])
+    train_raw_datasets = Dataset.from_pandas(df)
+    val_raw_datasets = Dataset.from_pandas(df_val)
+    return train_raw_datasets, val_raw_datasets
 
 
 def init_tokenizer(args, config_dict):
@@ -69,12 +72,12 @@ def tokenize_datasets(args, config_dict, tokenizer, raw_datasets):
     """
     # helper for tokenizing mapping tokenization function to each example
     def tokenize_function(examples):
-        return tokenizer(examples["triplet"], truncation=True)
+        return tokenizer(examples["data"], truncation=True)
     
     # tokenize datasets
     tokenized_datasets = raw_datasets.map(tokenize_function, batched=True)
     # remove "triplet" text column from dataset
-    tokenized_datasets = tokenized_datasets.remove_columns(["triplet"])
+    tokenized_datasets = tokenized_datasets.remove_columns(["data"])
     return tokenized_datasets
 
 
@@ -150,15 +153,16 @@ def certify_training_config(args, config_dict):
     assert config_dict['hyperparameters']['batch_size'] is not None, "ERROR: Please provide a batch size"
 
     # argparser flags for training saving options
-    if args.save_model == False:
+    # argparse parses arguments as string literals, so we cannot treat as booleans
+    if args.save_model == "False":
         print("WARNING: You have specified False to saving model. Your model will not be saved.")
     else:
         print(f"Saving model to: {os.path.abspath(config_dict['output_model_dir'])}")
-    if args.save_tokenizer == False:
+    if args.save_tokenizer == "False":
         print("WARNING: You have specified False to saving tokenizer. Your tokenizer will not be saved.")
     else:
         print(f"Saving tokenizer to: {os.path.abspath(config_dict['output_tokenizer_dir'])}")
-    if args.save_arguments == False:
+    if args.save_arguments == "False":
         print("WARNING: You have specified False to saving training args. Your training args will not be saved.")
     else:
         print(f"Saving training arguments and config to: {os.path.abspath(config_dict['output_training_args_dir'])}")
@@ -167,7 +171,7 @@ def certify_training_config(args, config_dict):
     return
     
 
-def init_trainer(args, config_dict, model, tokenizer, tokenized_datasets):
+def init_trainer(args, config_dict, model, tokenizer, train_tokenized_dataset, val_tokenized_dataset):
     """
     DESC:   Initialize trainer object
     INPUT:  args (argparse.ArgumentParser)
@@ -182,7 +186,6 @@ def init_trainer(args, config_dict, model, tokenizer, tokenized_datasets):
     # define training args
     training_args = TrainingArguments(output_dir=config_dict['output_model_dir'],
                                     overwrite_output_dir=True,
-                                    deepspeed=config_dict['path_to_deepspeed_config'],
                                     evaluation_strategy = "steps", # used to be epoch
                                     prediction_loss_only = True, #get rid of this if we end up adding metrics
                                     logging_dir=f"./logs/",
@@ -202,8 +205,8 @@ def init_trainer(args, config_dict, model, tokenizer, tokenized_datasets):
     trainer = Trainer(
         model=model,
         args=training_args,
-        train_dataset=tokenized_datasets['train'],
-        eval_dataset=tokenized_datasets['validation'],
+        train_dataset=train_tokenized_dataset,
+        eval_dataset=val_tokenized_dataset,
         data_collator=DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False),
         tokenizer=tokenizer
     )
@@ -254,11 +257,12 @@ def main(args):
     # --- Load yaml using args.config
     config_dict = load_config(args)
     # --- Load raw datasets from CSVs
-    raw_datasets = load_raw_train_validation_datasets(args, config_dict)
+    raw_train_dataset, raw_validation_dataset = load_raw_train_validation_datasets(args, config_dict)
     # --- Initialize tokenizer
     tokenizer = init_tokenizer(args, config_dict)
     # tokenize datasets
-    tokenized_datasets = tokenize_datasets(args, config_dict, tokenizer, raw_datasets)
+    train_tokenized_dataset = tokenize_datasets(args, config_dict, tokenizer, raw_train_dataset)
+    val_tokenized_dataset = tokenize_datasets(args, config_dict, tokenizer, raw_validation_dataset)
     # --- Initialize model
     model = init_model(args, config_dict, tokenizer)
     # --- Initialize optimizer
@@ -273,7 +277,7 @@ def main(args):
     val_dataloader = init_dataloader(args, config_dict, tokenizer, train_df, mode="Sequential")
     """
     # --- Initialize trainer
-    trainer = init_trainer(args, config_dict, model, tokenizer, tokenized_datasets)
+    trainer = init_trainer(args, config_dict, model, tokenizer, train_tokenized_dataset, val_tokenized_dataset)
     # --- Initialize wandb
     init_wandb(args, config_dict)
     # --- Set Seed

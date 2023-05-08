@@ -3,6 +3,7 @@ data_train_path: /home/ubuntu/transformer-fine-tune/data/instruct-reflections/tr
 data_validation_path: /home/ubuntu/transformer-fine-tune/data/instruct-reflections/validation-beta.csv
 output_data_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-small-beta
 output_model_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-small-beta
+output_tokenizer_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-small-alpha
 experiment_name: beta
 wandb_project_name: gpt2-small-reflector-beta
 wandb_notes: A small gpt-2 reflector trained on beta data (no instruction included)
