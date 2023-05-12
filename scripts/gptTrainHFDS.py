@@ -234,7 +234,7 @@ def init_trainer(args, config_dict, model, tokenizer, train_tokenized_dataset, v
                                     per_device_eval_batch_size=config_dict['hyperparameters']["eval_batch_size"],
                                     learning_rate=config_dict['hyperparameters']["learning_rate"],
                                     weight_decay=config_dict['hyperparameters']["weight_decay"],
-                                    eval_steps=config_dict['hyperparameters']["eval_steps"]
+                                    eval_steps=config_dict['hyperparameters']["eval_steps"],
                                     seed=config_dict['hyperparameters']["seed"],
                                     )
     # instantiate trainer
