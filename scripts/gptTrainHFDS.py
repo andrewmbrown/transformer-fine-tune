@@ -328,10 +328,17 @@ if __name__ == "__main__":
     # --- Instantiate Argument Parser ---
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config", help="Path to configuration YAML file", required=True)
-    parser.add_argument("-sm", "--save_model", help="Option - save model after training", required=True)
-    parser.add_argument("-st", "--save_tokenizer", help="Option - save tokenizer after training", required=True)
-    parser.add_argument("-sa", "--save_arguments", help="Option - save training arguments and config", required=True)
-    parser.add_argument("-w", "--wandb_key", help="Wandb key for logging training stats", required=False)
+
+    parser.add_argument("--save_model", action='store_true', help="Option - save model after training")
+    parser.add_argument("--dont_save_model", action='store_false', help="Option - save model after training")
+    parser.add_argument("--save_tokenizer", action='store_true', help="Option - save tokenizer after training")
+    parser.add_argument("--dont_save_tokenizer", action='store_false', help="Option - save tokenizer after training")
+    parser.add_argument("--save_arguments", action='store_true', help="Option - save training arguments and config")
+    parser.add_argument("--dont_save_arguments", action='store_false', help="Option - save training arguments and config")
+
+    parser.add_argument("--use_wandb", action='store_true', help="Path to Wandb key for logging training stats", required=False)
+    parser.add_argument("--dont_use_wandb", action='store_false', help="Path to Wandb key for logging training stats", required=False)
+    parser.set_defaults(feature=True)
 
     global args  # set global args scope potential for gpu diagnostics
     args = parser.parse_args()

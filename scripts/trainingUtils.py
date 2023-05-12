@@ -98,9 +98,11 @@ def init_wandb(args, config_dict):
             config_dict (dict) dictionary containing yaml file
     OUTPUT: None
     """
-    if args.wandb_key:
+    # load key from os environment variable
+    key = os.environ.get("WANDB_KEY")
+    if args.use_wandb:
         try:
-            wandb.login(key=args.wandb_key)
+            wandb.login(key=key)
             wandb.init(
                 project=config_dict["wandb_project_name"],
                 notes=config_dict["wandb_notes"],
