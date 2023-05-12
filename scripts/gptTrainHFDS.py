@@ -228,7 +228,7 @@ def init_trainer(args, config_dict, model, tokenizer, train_tokenized_dataset, v
                                     logging_strategy=config_dict['logging_strategy'],
                                     logging_steps=config_dict['logging_steps'],
                                     predict_with_generate=config_dict['predict_with_generate'],
-                                    bf16=config_dict['bf16'],
+                                    bf16=config_dict['hyperparameters']['bf16'],
                                     num_train_epochs=config_dict['hyperparameters']["epochs"],
                                     per_device_train_batch_size=config_dict['hyperparameters']["batch_size"],
                                     per_device_eval_batch_size=config_dict['hyperparameters']["eval_batch_size"],
