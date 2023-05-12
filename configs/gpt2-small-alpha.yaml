@@ -8,7 +8,7 @@ output_tokenizer_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-small-alpha
 logging_dir: /home/ubuntu/transformer-fine-tune/logs/
 logging_steps: 5
 logging_strategy: steps
-evaluation_strategy: epochs
+evaluation_strategy: epoch
 predict_with_generate: true
 
 # wandb settings
