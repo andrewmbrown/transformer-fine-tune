@@ -245,7 +245,7 @@ def init_trainer(args, config_dict, model, tokenizer, train_tokenized_dataset, v
         eval_dataset=val_tokenized_dataset,
         data_collator=DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False),
         tokenizer=tokenizer,
-        compute_metrics=compute_metrics
+        compute_metrics=compute_metrics(eval_dataset=val_tokenized_dataset, max_length=config_dict['ref_gen']['max_length'])
     )
     return trainer
 
