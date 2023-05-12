@@ -1,0 +1,32 @@
+model_name: gpt2
+data_train_path: /home/ubuntu/transformer-fine-tune/data/instruct-reflections/train-echo.csv
+data_validation_path: /home/ubuntu/transformer-fine-tune/data/instruct-reflections/validation-echo.csv
+output_data_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-small-echo
+output_model_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-small-echo
+output_tokenizer_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-small-echo
+experiment_name: echo
+wandb_project_name: gpt2-small-reflector-echo
+wandb_notes: A small gpt-2 reflector trained on echo data (alpaca-like formatted data)
+wandb_tags: GPT2, reflector, instruct, echo
+hyperparameters:
+  find_hyperparams_automatically: false
+  num_trials: 10
+  fp16: true
+  deepspeed: true
+  grad_accumulation_steps: 2
+  eval_batch_size: 1
+  learning_rate: 0.0003
+  epochs: 10
+  warmup_steps: 100
+  epsilon: 1e-7
+  batch_size: 1
+  sample_every: 100
+  seed: 42
+  eval_steps: 10
+  weight_decay: 0.01
+refgen:
+  temperature: 0.6
+  repetition_penalty: 1.1
+  do_sample: true
+  top_k: 100
+  top_p: 1
