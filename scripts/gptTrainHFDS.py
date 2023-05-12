@@ -157,18 +157,18 @@ def certify_training_config(args, config_dict):
 
     # argparser flags for training saving options
     # argparse parses arguments as string literals, so we cannot treat as booleans
-    if args.save_model == "False":
-        print("WARNING: You have specified False to saving model. Your model will not be saved.")
-    else:
+    if args.save_model:
         print(f"Saving model to: {os.path.abspath(config_dict['output_model_dir'])}")
-    if args.save_tokenizer == "False":
-        print("WARNING: You have specified False to saving tokenizer. Your tokenizer will not be saved.")
     else:
+        print("WARNING: You have specified False to saving model. Your model will not be saved.")
+    if args.save_tokenizer:
         print(f"Saving tokenizer to: {os.path.abspath(config_dict['output_tokenizer_dir'])}")
-    if args.save_arguments == "False":
-        print("WARNING: You have specified False to saving training args. Your training args will not be saved.")
     else:
+        print("WARNING: You have specified False to saving tokenizer. Your tokenizer will not be saved.")
+    if args.save_arguments:
         print(f"Saving training arguments and config to: {os.path.abspath(config_dict['output_training_args_dir'])}")
+    else:
+        print("WARNING: You have specified False to saving training args. Your training args will not be saved.")
 
     print("All required training configs are present!")
     return
