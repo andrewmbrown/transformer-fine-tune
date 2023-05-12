@@ -14,11 +14,14 @@ from tqdm import tqdm, trange
 import matplotlib.pyplot as plt
 
 # --- Machine Learning Imports ---
+import nltk
 import torch
+import evaluate  # hf evaluation library
 import deepspeed
 from torch.utils.data import Dataset, DataLoader, random_split, RandomSampler, SequentialSampler
 from transformers import Trainer, TrainingArguments, GPT2LMHeadModel, GPT2Tokenizer, GPT2Config, GPT2LMHeadModel
 from transformers import AdamW, get_linear_schedule_with_warmup, DataCollatorForLanguageModeling
+from transformers import Seq2SeqTrainingArguments, Seq2SeqTrainer
 from datasets import load_dataset
 from datasets import Dataset
 
@@ -171,6 +174,40 @@ def certify_training_config(args, config_dict):
     return
     
 
+def compute_metrics(eval_preds):
+    """
+    DESC:   During training, compute automated metrics for evaluation
+            Currently using rougeLSum
+    INPUT:  eval_preds (tuple) tuple containing predictions and labels
+    OUTPUT: result (dict) dictionary containing metrics
+    """
+    # unpack eval_preds tuple into predictions and labels
+    preds, labels = eval_preds
+
+    # instantiate rougeLSum metric
+    # Setup evaluation
+    nltk.download("punkt", quiet=True)
+    metric = evaluate.load("rouge")
+
+    # tokenizer doesn't exist in this scope, so we need to initialize it
+    local_dict = {"model_name": "gpt2"}
+    tokenizer = init_tokenizer(0, local_dict)    
+
+    # using tokenizer, decode predictions and labels
+    labels = np.where(labels != -100, labels, tokenizer.pad_token_id)
+    decoded_preds = tokenizer.batch_decode(preds, skip_special_tokens=True)
+    decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
+
+    # Now we can decide on which metrics to use for evaluation
+
+    # rougeLSum expects newline after each sentence
+    decoded_preds = ["\n".join(nltk.sent_tokenize(pred.strip())) for pred in decoded_preds]
+    decoded_labels = ["\n".join(nltk.sent_tokenize(label.strip())) for label in decoded_labels]
+
+    result = metric.compute(predictions=decoded_preds, references=decoded_labels, use_stemmer=True)
+    return result
+
+
 def init_trainer(args, config_dict, model, tokenizer, train_tokenized_dataset, val_tokenized_dataset):
     """
     DESC:   Initialize trainer object
@@ -184,31 +221,31 @@ def init_trainer(args, config_dict, model, tokenizer, train_tokenized_dataset, v
     # first check and validate that all required configs are present
     certify_training_config(args, config_dict)
     # define training args
-    training_args = TrainingArguments(output_dir=config_dict['output_model_dir'],
+    training_args = Seq2SeqTrainingArguments(output_dir=config_dict['output_model_dir'],
                                     overwrite_output_dir=True,
-                                    evaluation_strategy = "steps", # used to be epoch
-                                    prediction_loss_only = True, #get rid of this if we end up adding metrics
-                                    logging_dir=f"./logs/",
-                                    logging_strategy="steps",
-                                    logging_steps=5,
-                                    save_strategy="no",
-                                    bf16=True,
+                                    evaluation_strategy=config_dict['evaluation_strategy'],
+                                    logging_dir=config_dict['logging_dir'],
+                                    logging_strategy=config_dict['logging_strategy'],
+                                    logging_steps=config_dict['logging_steps'],
+                                    predict_with_generate=config_dict['predict_with_generate'],
+                                    bf16=config_dict['bf16'],
                                     num_train_epochs=config_dict['hyperparameters']["epochs"],
                                     per_device_train_batch_size=config_dict['hyperparameters']["batch_size"],
                                     per_device_eval_batch_size=config_dict['hyperparameters']["eval_batch_size"],
                                     learning_rate=config_dict['hyperparameters']["learning_rate"],
                                     weight_decay=config_dict['hyperparameters']["weight_decay"],
-                                    seed=config_dict['hyperparameters']["seed"],
                                     eval_steps=config_dict['hyperparameters']["eval_steps"]
+                                    seed=config_dict['hyperparameters']["seed"],
                                     )
     # instantiate trainer
-    trainer = Trainer(
+    trainer = Seq2SeqTrainer(
         model=model,
         args=training_args,
         train_dataset=train_tokenized_dataset,
         eval_dataset=val_tokenized_dataset,
         data_collator=DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False),
-        tokenizer=tokenizer
+        tokenizer=tokenizer,
+        compute_metrics=compute_metrics
     )
     return trainer
 
