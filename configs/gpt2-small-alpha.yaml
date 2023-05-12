@@ -1,17 +1,28 @@
+# hf settings
 model_name: gpt2
 data_train_path: /home/ubuntu/transformer-fine-tune/data/instruct-reflections/train-alpha.csv
 data_validation_path: /home/ubuntu/transformer-fine-tune/data/instruct-reflections/validation-alpha.csv
 output_data_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-small-alpha
 output_model_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-small-alpha
 output_tokenizer_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-small-alpha
+logging_dir: /home/ubuntu/transformer-fine-tune/logs/
+logging_steps: 5
+logging_strategy: steps
+evaluation_strategy: epochs
+predict_with_generate: true
+
+# wandb settings
 experiment_name: alpha
 wandb_project_name: gpt2-small-reflector-alpha
 wandb_notes: A small gpt-2 reflector trained on alpha data (with instruction included but no separator)
 wandb_tags: GPT2, reflector, instruct, alpha
+
+# hyperparameter settings
 hyperparameters:
   find_hyperparams_automatically: false
   num_trials: 10
   fp16: true
+  bf16: true
   deepspeed: true
   grad_accumulation_steps: 2
   eval_batch_size: 1
@@ -24,6 +35,8 @@ hyperparameters:
   seed: 42
   eval_steps: 10
   weight_decay: 0.01
+
+# inference settings
 refgen:
   temperature: 0.6
   repetition_penalty: 1.1
