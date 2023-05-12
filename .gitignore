@@ -17,3 +17,5 @@ notebooks/wandb/
 notebooks/*.csv
 notebooks/*.json
 notebooks/*.jsonl
+
+notebooks/dataformatter.ipynb
