@@ -14,3 +14,6 @@ models/*
 
 # ignore wandb files
 notebooks/wandb/
+notebooks/*.csv
+notebooks/*.json
+notebooks/*.jsonl
