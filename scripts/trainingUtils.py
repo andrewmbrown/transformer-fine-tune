@@ -99,16 +99,18 @@ def init_wandb(args, config_dict):
     OUTPUT: None
     """
     # load key from os environment variable
-    key = os.environ.get("WANDB_KEY")
     if args.use_wandb:
+        print("Wandb will be used for logging.")
+        print("Please make sure you have set the WANDB_KEY environment variable.")
         try:
+            key = os.environ.get("WANDB_KEY")
             wandb.login(key=key)
             wandb.init(
                 project=config_dict["wandb_project_name"],
                 notes=config_dict["wandb_notes"],
                 config=config_dict,
                 tags=config_dict["wandb_tags"])
-            print("wanbd login and init successful, logging run!")
+            print("wandb login and init successful, logging run!")
         except:
             print("WARNING: wandb key provided is invalid. Wandb will not be used.")
     else:
