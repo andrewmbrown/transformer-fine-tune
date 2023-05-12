@@ -38,6 +38,7 @@ hyperparameters:
 
 # inference settings
 refgen:
+  max_length: 300
   temperature: 0.6
   repetition_penalty: 1.1
   do_sample: true
