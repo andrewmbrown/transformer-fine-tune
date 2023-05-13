@@ -188,6 +188,7 @@ def compute_metrics(eval_preds):
     # Setup evaluation
     nltk.download("punkt", quiet=True)
     metric = evaluate.load("rouge")
+    # bertscore = evaluate.load("bertscore")
 
     # tokenizer doesn't exist in this scope, so we need to initialize it
     local_dict = {"model_name": "gpt2"}
@@ -199,6 +200,8 @@ def compute_metrics(eval_preds):
     decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
 
     # Now we can decide on which metrics to use for evaluation
+    # bertscore uses embediddings to compute semantic similarity
+    # results = bertscore.compute(predictions=decoded_preds, references=decoded_labels, model_type="distilbert-base-uncased")
 
     # rougeLSum expects newline after each sentence
     decoded_preds = ["\n".join(nltk.sent_tokenize(pred.strip())) for pred in decoded_preds]
@@ -224,18 +227,18 @@ def init_trainer(args, config_dict, model, tokenizer, train_tokenized_dataset, v
     training_args = Seq2SeqTrainingArguments(output_dir=config_dict['output_model_dir'],
                                     overwrite_output_dir=True,
                                     evaluation_strategy=config_dict['evaluation_strategy'],
+                                    eval_steps=config_dict["eval_steps"],
                                     logging_dir=config_dict['logging_dir'],
                                     logging_strategy=config_dict['logging_strategy'],
                                     logging_steps=config_dict['logging_steps'],
                                     predict_with_generate=config_dict['predict_with_generate'],
                                     generation_max_length=config_dict['generation_max_length'],
+                                    per_device_eval_batch_size=config_dict["eval_batch_size"],
+                                    per_device_train_batch_size=config_dict['hyperparameters']["batch_size"],
                                     bf16=config_dict['hyperparameters']['bf16'],
                                     num_train_epochs=config_dict['hyperparameters']["epochs"],
-                                    per_device_train_batch_size=config_dict['hyperparameters']["batch_size"],
-                                    per_device_eval_batch_size=config_dict['hyperparameters']["eval_batch_size"],
                                     learning_rate=config_dict['hyperparameters']["learning_rate"],
                                     weight_decay=config_dict['hyperparameters']["weight_decay"],
-                                    eval_steps=config_dict['hyperparameters']["eval_steps"],
                                     seed=config_dict['hyperparameters']["seed"],
                                     )
     # instantiate trainer

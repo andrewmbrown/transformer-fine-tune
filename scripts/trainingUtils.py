@@ -110,7 +110,7 @@ def init_wandb(args, config_dict):
                 notes=config_dict["wandb_notes"],
                 config=config_dict,
                 tags=config_dict["wandb_tags"])
-            print("wandb login and init successful, logging run!")
+            print("wand login and init successful, logging run!")
         except:
             print("WARNING: wandb key provided is invalid. Wandb will not be used.")
     else:
