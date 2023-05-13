@@ -228,6 +228,7 @@ def init_trainer(args, config_dict, model, tokenizer, train_tokenized_dataset, v
                                     logging_strategy=config_dict['logging_strategy'],
                                     logging_steps=config_dict['logging_steps'],
                                     predict_with_generate=config_dict['predict_with_generate'],
+                                    generation_max_length=config_dict['generation_max_length'],
                                     bf16=config_dict['hyperparameters']['bf16'],
                                     num_train_epochs=config_dict['hyperparameters']["epochs"],
                                     per_device_train_batch_size=config_dict['hyperparameters']["batch_size"],
@@ -245,7 +246,7 @@ def init_trainer(args, config_dict, model, tokenizer, train_tokenized_dataset, v
         eval_dataset=val_tokenized_dataset,
         data_collator=DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False),
         tokenizer=tokenizer,
-        compute_metrics=compute_metrics(eval_dataset=val_tokenized_dataset, max_length=config_dict['refgen']['max_length'])
+        compute_metrics=compute_metrics()
     )
     return trainer
 

@@ -10,6 +10,7 @@ logging_steps: 100
 logging_strategy: steps
 evaluation_strategy: epoch
 predict_with_generate: true
+generation_max_length: 200
 
 # wandb settings
 experiment_name: alpha
