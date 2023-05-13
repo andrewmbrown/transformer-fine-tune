@@ -1,10 +1,10 @@
 # hf settings
 model_name: gpt2
-data_train_path: /home/ubuntu/transformer-fine-tune/data/instruct-reflections/train-beta.csv
-data_validation_path: /home/ubuntu/transformer-fine-tune/data/instruct-reflections/validation-beta.csv
-output_data_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-small-beta
-output_model_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-small-beta
-output_tokenizer_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-small-beta
+data_train_path: /home/ubuntu/transformer-fine-tune/data/instruct-reflections/train-delta.csv
+data_validation_path: /home/ubuntu/transformer-fine-tune/data/instruct-reflections/validation-delta.csv
+output_data_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-small-delta
+output_model_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-small-delta
+output_tokenizer_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-small-delta
 logging_dir: /home/ubuntu/transformer-fine-tune/logs/
 logging_steps: 100
 logging_strategy: steps
@@ -15,10 +15,10 @@ predict_with_generate: true
 generation_max_length: 200
 
 # wandb settings
-experiment_name: beta
-wandb_project_name: gpt2-small-reflector-beta
-wandb_notes: A small gpt-2 reflector trained on beta data (no instruction included)
-wandb_tags: GPT2, reflector, instruct, beta
+experiment_name: delta
+wandb_project_name: gpt2-small-reflector-delta
+wandb_notes: A small gpt-2 reflector trained on delta data (with instruction included and separated after answer)
+wandb_tags: GPT2, reflector, instruct, delta
 
 # hyperparameter settings
 hyperparameters:
