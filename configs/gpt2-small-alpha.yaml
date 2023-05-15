@@ -6,9 +6,9 @@ output_data_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-small-alpha
 output_model_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-small-alpha
 output_tokenizer_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-small-alpha
 logging_dir: /home/ubuntu/transformer-fine-tune/logs/
-logging_steps: 100
+logging_steps: 250
 logging_strategy: steps
-evaluation_strategy: steps
+evaluation_strategy: epochs
 eval_steps: 2000
 eval_batch_size: 1
 predict_with_generate: true
@@ -29,7 +29,7 @@ hyperparameters:
   deepspeed: true
   grad_accumulation_steps: 2
   learning_rate: 0.0003
-  epochs: 10
+  epochs: 2
   warmup_steps: 100
   epsilon: 1e-7
   batch_size: 1
