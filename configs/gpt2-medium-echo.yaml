@@ -1,0 +1,47 @@
+# hf settings
+model_name: gpt2-medium
+data_train_path: /home/ubuntu/transformer-fine-tune/data/instruct-reflections/train-echo.csv
+data_validation_path: /home/ubuntu/transformer-fine-tune/data/instruct-reflections/validation-echo.csv
+output_data_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-medium-echo
+output_model_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-medium-echo
+output_tokenizer_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-medium-echo
+logging_dir: /home/ubuntu/transformer-fine-tune/logs/
+logging_steps: 100
+logging_strategy: steps
+evaluation_strategy: steps
+eval_steps: 2000
+eval_batch_size: 1
+predict_with_generate: true
+generation_max_length: 200
+
+# wandb settings
+experiment_name: echo
+wandb_project_name: gpt2-medium-reflector-echo
+wandb_notes: Scaling up GPT2small to medium gpt-2 reflector trained on echo data (alpaca like data)
+wandb_tags: GPT2, reflector, instruct, echo
+
+# hyperparameter settings
+hyperparameters:
+  find_hyperparams_automatically: false
+  num_trials: 10
+  fp16: true
+  bf16: true
+  deepspeed: true
+  grad_accumulation_steps: 2
+  learning_rate: 0.0003
+  epochs: 4
+  warmup_steps: 100
+  epsilon: 1e-7
+  batch_size: 1
+  sample_every: 100
+  seed: 42
+  weight_decay: 0.01
+
+# inference settings
+refgen:
+  max_length: 300
+  temperature: 0.6
+  repetition_penalty: 1.1
+  do_sample: true
+  top_k: 100
+  top_p: 1
