@@ -21,7 +21,7 @@ import deepspeed
 from torch.utils.data import Dataset, DataLoader, random_split, RandomSampler, SequentialSampler
 from transformers import Trainer, TrainingArguments, GPT2LMHeadModel, GPT2Tokenizer, GPT2Config, GPT2LMHeadModel
 from transformers import AdamW, get_linear_schedule_with_warmup, DataCollatorForLanguageModeling
-from transformers import Seq2SeqTrainingArguments, Seq2SeqTrainer
+from transformers import Seq2SeqTrainingArguments, Seq2SeqTrainer, EarlyStoppingCallback
 from datasets import load_dataset
 from datasets import Dataset
 
@@ -170,6 +170,15 @@ def certify_training_config(args, config_dict):
     else:
         print("WARNING: You have specified False to saving training args. Your training args will not be saved.")
 
+    # certify early stopping criteria
+    if config_dict['use_early_stopping']:
+        assert config_dict['load_best_model_at_end'] is not None
+        assert config_dict['metric_for_best_model'] is not None
+        assert config_dict['early_stopping_patience'] is not None
+        assert config_dict['greater_is_better'] is not None
+        print(f"WARNING: You have specified to use EARLY STOPPING on metric: {config_dict['metric_for_best_model']} with greater is better set to: {config_dict['greater_is_better']}")
+        print(f"WARNING: EARLY STOPPING patience: {config_dict['early_stopping_patience']}")
+
     print("All required training configs are present!")
     return
     
@@ -233,6 +242,8 @@ def init_trainer(args, config_dict, model, tokenizer, train_tokenized_dataset, v
                                     logging_steps=config_dict['logging_steps'],
                                     predict_with_generate=config_dict['predict_with_generate'],
                                     generation_max_length=config_dict['generation_max_length'],
+                                    metric_for_best_model=config_dict['metric_for_best_model'],
+                                    load_best_model_at_end=config_dict['load_best_model_at_end'],
                                     per_device_eval_batch_size=config_dict["eval_batch_size"],
                                     per_device_train_batch_size=config_dict['hyperparameters']["batch_size"],
                                     bf16=config_dict['hyperparameters']['bf16'],
@@ -251,6 +262,11 @@ def init_trainer(args, config_dict, model, tokenizer, train_tokenized_dataset, v
         tokenizer=tokenizer,
         compute_metrics=compute_metrics
     )
+    # configure early stopping if need be
+    if config_dict['use_early_stopping']:
+        callback = EarlyStoppingCallback(early_stopping_patience=config_dict['early_stopping_patience'])
+        trainer.add_callback(callback)
+
     return trainer
 
 
