@@ -1,10 +1,10 @@
 # hf settings
-model_name: gpt2-medium
+model_name: gpt2-large
 data_train_path: /home/ubuntu/transformer-fine-tune/data/instruct-reflections/train-echo.csv
 data_validation_path: /home/ubuntu/transformer-fine-tune/data/instruct-reflections/validation-echo.csv
-output_data_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-medium-echo
-output_model_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-medium-echo
-output_tokenizer_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-medium-echo
+output_data_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-large-echo
+output_model_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-large-echo
+output_tokenizer_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-large-echo
 logging_dir: /home/ubuntu/transformer-fine-tune/logs/
 logging_steps: 100
 logging_strategy: steps
@@ -15,15 +15,15 @@ predict_with_generate: true
 generation_max_length: 200
 use_early_stopping: true
 load_best_model_at_end: true  # has to be true alongside early stopping
-early_stopping_patience: 10
+early_stopping_patience: 5
 metric_for_best_model: eval_loss
 greater_is_better: false  # we want the lowest possible eval_loss
 
 # wandb settings
 experiment_name: echo
 wandb_project_name: gpt2-reflector-echo
-wandb_notes: A medium gpt-2 reflector trained on echo data (alpaca like data), trying out early stopping
-wandb_tags: GPT2-medium, reflector, instruct, echo
+wandb_notes: Complete gpt-2 family run large gpt-2 reflector trained on echo data (alpaca like data), trying out early stopping
+wandb_tags: GPT2-large, reflector, instruct, echo
 
 # hyperparameter settings
 hyperparameters:

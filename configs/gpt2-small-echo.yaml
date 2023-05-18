@@ -15,15 +15,15 @@ predict_with_generate: true
 generation_max_length: 200
 use_early_stopping: true
 load_best_model_at_end: true  # has to be true alongside early stopping
-early_stopping_patience: 5
+early_stopping_patience: 10
 metric_for_best_model: eval_loss
 greater_is_better: false  # we want the lowest possible eval_loss
 
 # wandb settings
 experiment_name: echo
-wandb_project_name: gpt2-small-reflector-echo
-wandb_notes: A small gpt-2 reflector trained on echo data (alpaca like data), trying out early stopping
-wandb_tags: GPT2, reflector, instruct, echo
+wandb_project_name: gpt2-reflector-echo
+wandb_notes: Complete gpt-2 run (GPT2Small) reflector trained on echo data (alpaca like data), with early stopping
+wandb_tags: GPT2-small, reflector, instruct, echo
 
 # hyperparameter settings
 hyperparameters:
