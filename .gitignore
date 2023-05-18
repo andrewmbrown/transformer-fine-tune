@@ -18,4 +18,8 @@ notebooks/*.csv
 notebooks/*.json
 notebooks/*.jsonl
 
+# dont allow binary __pycache__ files
+scripts/__pycache__
+
+# custom disallow for this notebook
 notebooks/dataformatter.ipynb
