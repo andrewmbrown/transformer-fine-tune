@@ -14,11 +14,14 @@ from tqdm import tqdm, trange
 import matplotlib.pyplot as plt
 
 # --- Machine Learning Imports ---
+import nltk
 import torch
+import evaluate  # hf evaluation library
 import deepspeed
 from torch.utils.data import Dataset, DataLoader, random_split, RandomSampler, SequentialSampler
 from transformers import Trainer, TrainingArguments, GPT2LMHeadModel, GPT2Tokenizer, GPT2Config, GPT2LMHeadModel
 from transformers import AdamW, get_linear_schedule_with_warmup, DataCollatorForLanguageModeling
+from transformers import Seq2SeqTrainingArguments, Seq2SeqTrainer
 from datasets import load_dataset
 from datasets import Dataset
 
@@ -154,22 +157,59 @@ def certify_training_config(args, config_dict):
 
     # argparser flags for training saving options
     # argparse parses arguments as string literals, so we cannot treat as booleans
-    if args.save_model == "False":
-        print("WARNING: You have specified False to saving model. Your model will not be saved.")
-    else:
+    if args.save_model:
         print(f"Saving model to: {os.path.abspath(config_dict['output_model_dir'])}")
-    if args.save_tokenizer == "False":
-        print("WARNING: You have specified False to saving tokenizer. Your tokenizer will not be saved.")
     else:
+        print("WARNING: You have specified False to saving model. Your model will not be saved.")
+    if args.save_tokenizer:
         print(f"Saving tokenizer to: {os.path.abspath(config_dict['output_tokenizer_dir'])}")
-    if args.save_arguments == "False":
-        print("WARNING: You have specified False to saving training args. Your training args will not be saved.")
     else:
+        print("WARNING: You have specified False to saving tokenizer. Your tokenizer will not be saved.")
+    if args.save_arguments:
         print(f"Saving training arguments and config to: {os.path.abspath(config_dict['output_training_args_dir'])}")
+    else:
+        print("WARNING: You have specified False to saving training args. Your training args will not be saved.")
 
     print("All required training configs are present!")
     return
     
+
+def compute_metrics(eval_preds):
+    """
+    DESC:   During training, compute automated metrics for evaluation
+            Currently using rougeLSum
+    INPUT:  eval_preds (tuple) tuple containing predictions and labels
+    OUTPUT: result (dict) dictionary containing metrics
+    """
+    # unpack eval_preds tuple into predictions and labels
+    preds, labels = eval_preds
+
+    # instantiate rougeLSum metric
+    # Setup evaluation
+    nltk.download("punkt", quiet=True)
+    metric = evaluate.load("rouge")
+    # bertscore = evaluate.load("bertscore")
+
+    # tokenizer doesn't exist in this scope, so we need to initialize it
+    local_dict = {"model_name": "gpt2"}
+    tokenizer = init_tokenizer(0, local_dict)    
+
+    # using tokenizer, decode predictions and labels
+    labels = np.where(labels != -100, labels, tokenizer.pad_token_id)
+    decoded_preds = tokenizer.batch_decode(preds, skip_special_tokens=True)
+    decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
+
+    # Now we can decide on which metrics to use for evaluation
+    # bertscore uses embediddings to compute semantic similarity
+    # results = bertscore.compute(predictions=decoded_preds, references=decoded_labels, model_type="distilbert-base-uncased")
+
+    # rougeLSum expects newline after each sentence
+    decoded_preds = ["\n".join(nltk.sent_tokenize(pred.strip())) for pred in decoded_preds]
+    decoded_labels = ["\n".join(nltk.sent_tokenize(label.strip())) for label in decoded_labels]
+
+    result = metric.compute(predictions=decoded_preds, references=decoded_labels, use_stemmer=True)
+    return result
+
 
 def init_trainer(args, config_dict, model, tokenizer, train_tokenized_dataset, val_tokenized_dataset):
     """
@@ -184,31 +224,32 @@ def init_trainer(args, config_dict, model, tokenizer, train_tokenized_dataset, v
     # first check and validate that all required configs are present
     certify_training_config(args, config_dict)
     # define training args
-    training_args = TrainingArguments(output_dir=config_dict['output_model_dir'],
+    training_args = Seq2SeqTrainingArguments(output_dir=config_dict['output_model_dir'],
                                     overwrite_output_dir=True,
-                                    evaluation_strategy = "steps", # used to be epoch
-                                    prediction_loss_only = True, #get rid of this if we end up adding metrics
-                                    logging_dir=f"./logs/",
-                                    logging_strategy="steps",
-                                    logging_steps=5,
-                                    save_strategy="no",
-                                    bf16=True,
-                                    num_train_epochs=config_dict['hyperparameters']["epochs"],
+                                    evaluation_strategy=config_dict['evaluation_strategy'],
+                                    eval_steps=config_dict["eval_steps"],
+                                    logging_dir=config_dict['logging_dir'],
+                                    logging_strategy=config_dict['logging_strategy'],
+                                    logging_steps=config_dict['logging_steps'],
+                                    predict_with_generate=config_dict['predict_with_generate'],
+                                    generation_max_length=config_dict['generation_max_length'],
+                                    per_device_eval_batch_size=config_dict["eval_batch_size"],
                                     per_device_train_batch_size=config_dict['hyperparameters']["batch_size"],
-                                    per_device_eval_batch_size=config_dict['hyperparameters']["eval_batch_size"],
+                                    bf16=config_dict['hyperparameters']['bf16'],
+                                    num_train_epochs=config_dict['hyperparameters']["epochs"],
                                     learning_rate=config_dict['hyperparameters']["learning_rate"],
                                     weight_decay=config_dict['hyperparameters']["weight_decay"],
                                     seed=config_dict['hyperparameters']["seed"],
-                                    eval_steps=config_dict['hyperparameters']["eval_steps"]
                                     )
     # instantiate trainer
-    trainer = Trainer(
+    trainer = Seq2SeqTrainer(
         model=model,
         args=training_args,
         train_dataset=train_tokenized_dataset,
         eval_dataset=val_tokenized_dataset,
         data_collator=DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False),
-        tokenizer=tokenizer
+        tokenizer=tokenizer,
+        compute_metrics=compute_metrics
     )
     return trainer
 
@@ -291,10 +332,17 @@ if __name__ == "__main__":
     # --- Instantiate Argument Parser ---
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config", help="Path to configuration YAML file", required=True)
-    parser.add_argument("-sm", "--save_model", help="Option - save model after training", required=True)
-    parser.add_argument("-st", "--save_tokenizer", help="Option - save tokenizer after training", required=True)
-    parser.add_argument("-sa", "--save_arguments", help="Option - save training arguments and config", required=True)
-    parser.add_argument("-w", "--wandb_key", help="Wandb key for logging training stats", required=False)
+
+    parser.add_argument("--save_model", action='store_true', help="Option - save model after training")
+    parser.add_argument("--dont_save_model", action='store_false', help="Option - save model after training")
+    parser.add_argument("--save_tokenizer", action='store_true', help="Option - save tokenizer after training")
+    parser.add_argument("--dont_save_tokenizer", action='store_false', help="Option - save tokenizer after training")
+    parser.add_argument("--save_arguments", action='store_true', help="Option - save training arguments and config")
+    parser.add_argument("--dont_save_arguments", action='store_false', help="Option - save training arguments and config")
+
+    parser.add_argument("--use_wandb", action='store_true', help="Path to Wandb key for logging training stats", required=False)
+    parser.add_argument("--dont_use_wandb", action='store_false', help="Path to Wandb key for logging training stats", required=False)
+    parser.set_defaults(feature=True)
 
     global args  # set global args scope potential for gpu diagnostics
     args = parser.parse_args()
