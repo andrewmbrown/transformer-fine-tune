@@ -179,6 +179,13 @@ def certify_training_config(args, config_dict):
         print(f"WARNING: You have specified to use EARLY STOPPING on metric: {config_dict['metric_for_best_model']} with greater is better set to: {config_dict['greater_is_better']}")
         print(f"WARNING: EARLY STOPPING patience: {config_dict['early_stopping_patience']}")
 
+    if args.use_deepspeed:
+        assert config_dict['deepspeed_config_path'] is not None
+        print(f"WARNING: You have specified to use Deepspeed, below is config path")
+        print(f"{config_dict['deepspeed_config_path']}")
+    else:
+        print("WARNING: Not using deepspeed")
+
     print("All required training configs are present!")
     return
     
@@ -233,26 +240,50 @@ def init_trainer(args, config_dict, model, tokenizer, train_tokenized_dataset, v
     # first check and validate that all required configs are present
     certify_training_config(args, config_dict)
     # define training args
-    training_args = Seq2SeqTrainingArguments(output_dir=config_dict['output_model_dir'],
-                                    overwrite_output_dir=True,
-                                    evaluation_strategy=config_dict['evaluation_strategy'],
-                                    eval_steps=config_dict["eval_steps"],
-                                    deepspeed=config_dict['deepspeed_config_path'],
-                                    logging_dir=config_dict['logging_dir'],
-                                    logging_strategy=config_dict['logging_strategy'],
-                                    logging_steps=config_dict['logging_steps'],
-                                    predict_with_generate=config_dict['predict_with_generate'],
-                                    generation_max_length=config_dict['generation_max_length'],
-                                    metric_for_best_model=config_dict['metric_for_best_model'],
-                                    load_best_model_at_end=config_dict['load_best_model_at_end'],
-                                    per_device_eval_batch_size=config_dict["eval_batch_size"],
-                                    per_device_train_batch_size=config_dict['hyperparameters']["batch_size"],
-                                    bf16=config_dict['hyperparameters']['bf16'],
-                                    num_train_epochs=config_dict['hyperparameters']["epochs"],
-                                    learning_rate=config_dict['hyperparameters']["learning_rate"],
-                                    weight_decay=config_dict['hyperparameters']["weight_decay"],
-                                    seed=config_dict['hyperparameters']["seed"],
-                                    )
+
+    # some extra logic for giving deepspeed json config - probably temporary
+    if args.use_deepspeed:
+        training_args = Seq2SeqTrainingArguments(output_dir=config_dict['output_model_dir'],
+                                        overwrite_output_dir=True,
+                                        evaluation_strategy=config_dict['evaluation_strategy'],
+                                        eval_steps=config_dict["eval_steps"],
+                                        deepspeed=config_dict['deepspeed_config_path'],
+                                        logging_dir=config_dict['logging_dir'],
+                                        logging_strategy=config_dict['logging_strategy'],
+                                        logging_steps=config_dict['logging_steps'],
+                                        predict_with_generate=config_dict['predict_with_generate'],
+                                        generation_max_length=config_dict['generation_max_length'],
+                                        metric_for_best_model=config_dict['metric_for_best_model'],
+                                        load_best_model_at_end=config_dict['load_best_model_at_end'],
+                                        per_device_eval_batch_size=config_dict["eval_batch_size"],
+                                        per_device_train_batch_size=config_dict['hyperparameters']["batch_size"],
+                                        bf16=config_dict['hyperparameters']['bf16'],
+                                        num_train_epochs=config_dict['hyperparameters']["epochs"],
+                                        learning_rate=config_dict['hyperparameters']["learning_rate"],
+                                        weight_decay=config_dict['hyperparameters']["weight_decay"],
+                                        seed=config_dict['hyperparameters']["seed"],
+                                        )
+    else:
+        training_args = Seq2SeqTrainingArguments(output_dir=config_dict['output_model_dir'],
+                                        overwrite_output_dir=True,
+                                        evaluation_strategy=config_dict['evaluation_strategy'],
+                                        eval_steps=config_dict["eval_steps"],
+                                        logging_dir=config_dict['logging_dir'],
+                                        logging_strategy=config_dict['logging_strategy'],
+                                        logging_steps=config_dict['logging_steps'],
+                                        predict_with_generate=config_dict['predict_with_generate'],
+                                        generation_max_length=config_dict['generation_max_length'],
+                                        metric_for_best_model=config_dict['metric_for_best_model'],
+                                        load_best_model_at_end=config_dict['load_best_model_at_end'],
+                                        per_device_eval_batch_size=config_dict["eval_batch_size"],
+                                        per_device_train_batch_size=config_dict['hyperparameters']["batch_size"],
+                                        bf16=config_dict['hyperparameters']['bf16'],
+                                        num_train_epochs=config_dict['hyperparameters']["epochs"],
+                                        learning_rate=config_dict['hyperparameters']["learning_rate"],
+                                        weight_decay=config_dict['hyperparameters']["weight_decay"],
+                                        seed=config_dict['hyperparameters']["seed"],
+                                        )
+
     # instantiate trainer
     trainer = Seq2SeqTrainer(
         model=model,
@@ -359,6 +390,8 @@ if __name__ == "__main__":
 
     parser.add_argument("--use_wandb", action='store_true', help="Path to Wandb key for logging training stats", required=False)
     parser.add_argument("--dont_use_wandb", action='store_false', help="Path to Wandb key for logging training stats", required=False)
+    parser.add_argument("--use_deepspeed", action='store_true', help="Option - use deepspeed during training", required=False)
+    parser.add_argument("--dont_use_deepspeed", action='store_false', help="Option - don't use deepspeed during training", required=False)
     parser.set_defaults(feature=True)
 
     global args  # set global args scope potential for gpu diagnostics
