@@ -237,6 +237,7 @@ def init_trainer(args, config_dict, model, tokenizer, train_tokenized_dataset, v
                                     overwrite_output_dir=True,
                                     evaluation_strategy=config_dict['evaluation_strategy'],
                                     eval_steps=config_dict["eval_steps"],
+                                    deepspeed=config_dict['deepspeed_config_path'],
                                     logging_dir=config_dict['logging_dir'],
                                     logging_strategy=config_dict['logging_strategy'],
                                     logging_steps=config_dict['logging_steps'],
