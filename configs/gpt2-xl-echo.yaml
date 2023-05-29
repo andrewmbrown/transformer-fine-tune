@@ -12,7 +12,7 @@ logging_strategy: steps
 evaluation_strategy: steps
 eval_steps: 500
 eval_batch_size: 1
-predict_with_generate: true
+predict_with_generate: false
 generation_max_length: 200
 save_total_limit: 3
 use_early_stopping: true
