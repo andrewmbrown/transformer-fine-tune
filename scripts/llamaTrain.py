@@ -51,10 +51,10 @@ def load_raw_train_validation_datasets(args, config_dict):
 
 def init_tokenizer(args, config_dict):
     """
-    DESC:   Initialize GPT2 tokenizer (byte-level BPE tokenizer)
+    DESC:   Initialize LLaMA tokenizer (byte-level BPE tokenizer)
     INPUT:  args (argparse.ArgumentParser)
             config_dict (dict) dictionary containing training configs
-    OUTPUT: tokenizer (GPT2Tokenizer) tokenizer for GPT2 model
+    OUTPUT: tokenizer (LLaMA) tokenizer for LLaMA Casual LM
     """
     assert config_dict['model_name'] is not None, "ERROR: Please provide a tokenizer name"
     # model name is the same as tokenizer, so we can use it to load the tokenizer
@@ -66,10 +66,10 @@ def init_tokenizer(args, config_dict):
 
 def tokenize_datasets(args, config_dict, tokenizer, raw_datasets):
     """
-    DESC:   Tokenize datasets using GPT2 tokenizer
+    DESC:   Tokenize datasets using LLaMA tokenizer
     INPUT:  args (argparse.ArgumentParser)
             config_dict (dict) dictionary containing training configs
-            tokenizer (GPT2Tokenizer) tokenizer for GPT2 model
+            tokenizer (LLaMA) tokenizer for LLaMA model
             raw_datasets (dict) dictionary containing train and validation datasets
     OUTPUT: tokenized_datasets (dict) dictionary containing tokenized train and validation datasets
     """
@@ -89,15 +89,15 @@ def init_model(args, config_dict, tokenizer):
     DESC:   Load gpt2 configuration, then model
     INPUT:  args (argparse.ArgumentParser)
             config_dict (dict) dictionary containing training configs
-            tokenizer (GPT2Tokenizer) tokenizer for GPT2 model
-    OUTPUT: model (GPT2LMHeadModel) GPT2 model
+            tokenizer (LLaMA) tokenizer for LLaMA model
+    OUTPUT: model (LlamaForCasuaLLM) LLaMA model
     """
     assert config_dict['model_name'] is not None, "ERROR: Please provide a model name"
     assert args.device is not None, "ERROR: Please provide a device (cpu/gpu/etc) to mount model"
     # Load GPT2 configuration
-    config = GPT2Config.from_pretrained(config_dict['model_name'], output_hidden_states=False)
+    config = LlamaConfig.from_pretrained(config_dict['model_name'], output_hidden_states=False)
     # instantiate model
-    model = GPT2LMHeadModel.from_pretrained(config_dict['model_name'], config=config)
+    model = LlamaForCausalLM.from_pretrained(config_dict['model_name'], config=config)
     # resize token embeddings for our custom tokens
     model.resize_token_embeddings(len(tokenizer))
     # move model to GPU (if available)
@@ -110,7 +110,7 @@ def load_optimizer(args, config_dict, model):
     DESC:   Load optimizer (currently only AdamW) TODO: add other optimizers
     INPUT:  args (argparse.ArgumentParser)
             config_dict (dict) dictionary containing training configs
-            model (GPT2LMHeadModel) GPT2 model
+            model (LlamaForCasualLM) LLaMA model
     OUTPUT: optimizer (AdamW) AdamW optimizer
     """
     # Note: AdamW is a class from the huggingface library (as opposed to pytorch) 
@@ -232,8 +232,8 @@ def init_trainer(args, config_dict, model, tokenizer, train_tokenized_dataset, v
     DESC:   Initialize trainer object
     INPUT:  args (argparse.ArgumentParser)
             config_dict (dict) dictionary containing training configs
-            model (GPT2LMHeadModel) untrained GPT2 model
-            tokenizer (GPT2Tokenizer) tokenizer for GPT2 model
+            model (LlamaForCasualLM) untrained LLaMA model
+            tokenizer (LlamaTokenizer) tokenizer for LLaMA model
             tokenized_datasets (dict) dictionary containing tokenized train and validation datasets
     OUTPUT: trainer (transformers.Trainer) trainer object
     """
