@@ -1,0 +1,54 @@
+# hf settings
+model_name: gpt2-xl
+data_train_path: /home/ubuntu/transformer-fine-tune/data/instruct-reflections/train-beta.csv
+deepspeed_config_path: /home/ubuntu/transformer-fine-tune/configs/ds_config_zero2.json
+data_validation_path: /home/ubuntu/transformer-fine-tune/data/instruct-reflections/validation-beta.csv
+output_data_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-xl-beta
+output_model_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-xl-beta
+output_tokenizer_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-xl-beta
+logging_dir: /home/ubuntu/transformer-fine-tune/logs/
+logging_steps: 100
+logging_strategy: steps
+evaluation_strategy: steps
+eval_steps: 500
+eval_batch_size: 1
+predict_with_generate: false
+generation_max_length: 200
+save_total_limit: 3
+use_early_stopping: true
+load_best_model_at_end: true  # has to be true alongside early stopping
+early_stopping_patience: 3
+metric_for_best_model: eval_loss
+greater_is_better: false  # we want the lowest possible eval_loss
+
+# wandb settings
+experiment_name: echo
+wandb_project_name: gpt2-reflector-echo
+wandb_notes: Complete gpt-2 family run - gpt-2 XL reflector trained on echo data (alpaca like data), trying out early stopping
+wandb_tags: GPT2-xl, reflector, instruct, echo
+
+# hyperparameter settings
+hyperparameters:
+  find_hyperparams_automatically: false
+  num_trials: 10
+  fp16: true
+  bf16: true
+  deepspeed: true
+  grad_accumulation_steps: 2
+  learning_rate: 0.0003
+  epochs: 3
+  warmup_steps: 100
+  epsilon: 1e-7
+  batch_size: 1
+  sample_every: 100
+  seed: 42
+  weight_decay: 0.01
+
+# inference settings
+refgen:
+  max_length: 300
+  temperature: 0.6
+  repetition_penalty: 1.1
+  do_sample: true
+  top_k: 100
+  top_p: 1
