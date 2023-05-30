@@ -17,7 +17,7 @@ generation_max_length: 200
 save_total_limit: 3
 use_early_stopping: true
 load_best_model_at_end: true  # has to be true alongside early stopping
-early_stopping_patience: 10
+early_stopping_patience: 3
 metric_for_best_model: eval_loss
 greater_is_better: false  # we want the lowest possible eval_loss
 
@@ -36,7 +36,7 @@ hyperparameters:
   deepspeed: true
   grad_accumulation_steps: 2
   learning_rate: 0.0003
-  epochs: 7
+  epochs: 2
   warmup_steps: 100
   epsilon: 1e-7
   batch_size: 1
