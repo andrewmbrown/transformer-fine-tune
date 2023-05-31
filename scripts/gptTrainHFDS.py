@@ -19,7 +19,7 @@ import torch
 import evaluate  # hf evaluation library
 import deepspeed
 from torch.utils.data import Dataset, DataLoader, random_split, RandomSampler, SequentialSampler
-from transformers import Trainer, TrainingArguments, GPT2LMHeadModel, GPT2Tokenizer, GPT2Config, GPT2LMHeadModel
+from transformers import Trainer, TrainingArguments, AutoConfig, AutoModel, AutoModelForCasualLM, AutoTokenizer
 from transformers import AdamW, get_linear_schedule_with_warmup, DataCollatorForLanguageModeling
 from transformers import Seq2SeqTrainingArguments, Seq2SeqTrainer, EarlyStoppingCallback
 from datasets import load_dataset
