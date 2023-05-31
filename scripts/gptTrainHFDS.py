@@ -293,8 +293,8 @@ def init_trainer(args, config_dict, model, tokenizer, train_tokenized_dataset, v
         train_dataset=train_tokenized_dataset,
         eval_dataset=val_tokenized_dataset,
         data_collator=DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False),
-        tokenizer=tokenizer,
-        compute_metrics=compute_metrics
+        tokenizer=tokenizer
+        # compute_metrics=compute_metrics
     )
     # configure early stopping if need be
     if config_dict['use_early_stopping']:
