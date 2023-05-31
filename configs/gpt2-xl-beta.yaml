@@ -11,6 +11,7 @@ logging_steps: 100
 logging_strategy: steps
 evaluation_strategy: steps
 eval_steps: 500
+eval_accumulation_steps: 100
 eval_batch_size: 1
 predict_with_generate: false
 generation_max_length: 200
