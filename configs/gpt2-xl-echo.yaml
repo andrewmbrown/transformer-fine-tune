@@ -24,7 +24,7 @@ greater_is_better: false  # we want the lowest possible eval_loss
 # wandb settings
 experiment_name: echo
 wandb_project_name: gpt2-reflector-echo
-wandb_notes: Complete gpt-2 family run - gpt-2 XL reflector trained on echo data (alpaca like data), trying out early stopping
+wandb_notes: Complete gpt-2 family run - gpt-2 XL reflector trained on echo data (alpaca like data), trying larger batches with early stopping
 wandb_tags: GPT2-xl, reflector, instruct, echo
 
 # hyperparameter settings
@@ -37,9 +37,9 @@ hyperparameters:
   grad_accumulation_steps: 2
   learning_rate: 0.0003
   epochs: 2
-  warmup_steps: 100
+  warmup_steps: 10066666
   epsilon: 1e-7
-  batch_size: 1
+  batch_size: 16
   sample_every: 100
   seed: 42
   weight_decay: 0.01

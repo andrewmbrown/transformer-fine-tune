@@ -19,7 +19,7 @@ import torch
 import evaluate  # hf evaluation library
 import deepspeed
 from torch.utils.data import Dataset, DataLoader, random_split, RandomSampler, SequentialSampler
-from transformers import Trainer, TrainingArguments, GPT2LMHeadModel, GPT2Tokenizer, GPT2Config, GPT2LMHeadModel
+from transformers import Trainer, TrainingArguments, AutoConfig, AutoModel, AutoModelForCasualLM, AutoTokenizer
 from transformers import AdamW, get_linear_schedule_with_warmup, DataCollatorForLanguageModeling
 from transformers import Seq2SeqTrainingArguments, Seq2SeqTrainer, EarlyStoppingCallback
 from datasets import load_dataset
@@ -51,14 +51,14 @@ def load_raw_train_validation_datasets(args, config_dict):
 
 def init_tokenizer(args, config_dict):
     """
-    DESC:   Initialize GPT2 tokenizer (byte-level BPE tokenizer)
+    DESC:   Initialize LM tokenizer (byte-level BPE tokenizer)
     INPUT:  args (argparse.ArgumentParser)
             config_dict (dict) dictionary containing training configs
-    OUTPUT: tokenizer (GPT2Tokenizer) tokenizer for GPT2 model
+    OUTPUT: tokenizer (AutoTokenizer) tokenizer for LM model
     """
     assert config_dict['model_name'] is not None, "ERROR: Please provide a tokenizer name"
     # model name is the same as tokenizer, so we can use it to load the tokenizer
-    tokenizer = GPT2Tokenizer.from_pretrained(config_dict['model_name'])
+    tokenizer = AutoTokenizer.from_pretrained(config_dict['model_name'])
     # set pad token to eos token
     tokenizer.pad_token = tokenizer.eos_token
     return tokenizer
@@ -66,10 +66,10 @@ def init_tokenizer(args, config_dict):
 
 def tokenize_datasets(args, config_dict, tokenizer, raw_datasets):
     """
-    DESC:   Tokenize datasets using GPT2 tokenizer
+    DESC:   Tokenize datasets using LM tokenizer
     INPUT:  args (argparse.ArgumentParser)
             config_dict (dict) dictionary containing training configs
-            tokenizer (GPT2Tokenizer) tokenizer for GPT2 model
+            tokenizer (AutoTokenizer) tokenizer for LM model
             raw_datasets (dict) dictionary containing train and validation datasets
     OUTPUT: tokenized_datasets (dict) dictionary containing tokenized train and validation datasets
     """
@@ -86,18 +86,18 @@ def tokenize_datasets(args, config_dict, tokenizer, raw_datasets):
 
 def init_model(args, config_dict, tokenizer):
     """
-    DESC:   Load gpt2 configuration, then model
+    DESC:   Load LM configuration, then model
     INPUT:  args (argparse.ArgumentParser)
             config_dict (dict) dictionary containing training configs
-            tokenizer (GPT2Tokenizer) tokenizer for GPT2 model
-    OUTPUT: model (GPT2LMHeadModel) GPT2 model
+            tokenizer (AutoTokenizer) tokenizer for LM model
+    OUTPUT: model (AutoModelForCasualLM) LM model
     """
     assert config_dict['model_name'] is not None, "ERROR: Please provide a model name"
     assert args.device is not None, "ERROR: Please provide a device (cpu/gpu/etc) to mount model"
-    # Load GPT2 configuration
-    config = GPT2Config.from_pretrained(config_dict['model_name'], output_hidden_states=False)
+    # Load LM configuration
+    config = AutoConfig.from_pretrained(config_dict['model_name'], output_hidden_states=False)
     # instantiate model
-    model = GPT2LMHeadModel.from_pretrained(config_dict['model_name'], config=config)
+    model = AutoModelForCasualLM.from_pretrained(config_dict['model_name'], config=config)
     # resize token embeddings for our custom tokens
     model.resize_token_embeddings(len(tokenizer))
     # move model to GPU (if available)
@@ -110,7 +110,7 @@ def load_optimizer(args, config_dict, model):
     DESC:   Load optimizer (currently only AdamW) TODO: add other optimizers
     INPUT:  args (argparse.ArgumentParser)
             config_dict (dict) dictionary containing training configs
-            model (GPT2LMHeadModel) GPT2 model
+            model (AutoModelForCasualLM) LM model
     OUTPUT: optimizer (AdamW) AdamW optimizer
     """
     # Note: AdamW is a class from the huggingface library (as opposed to pytorch) 
@@ -207,7 +207,7 @@ def compute_metrics(eval_preds):
     # bertscore = evaluate.load("bertscore")
 
     # tokenizer doesn't exist in this scope, so we need to initialize it
-    local_dict = {"model_name": "gpt2"}
+    local_dict = {"model_name": "LM"}
     tokenizer = init_tokenizer(0, local_dict)    
 
     # using tokenizer, decode predictions and labels
@@ -232,8 +232,8 @@ def init_trainer(args, config_dict, model, tokenizer, train_tokenized_dataset, v
     DESC:   Initialize trainer object
     INPUT:  args (argparse.ArgumentParser)
             config_dict (dict) dictionary containing training configs
-            model (GPT2LMHeadModel) untrained GPT2 model
-            tokenizer (GPT2Tokenizer) tokenizer for GPT2 model
+            model (AutoModelForCasualLM) untrained AutoModelForCasualLM model
+            tokenizer (AutoTokenizer) tokenizer for LM model
             tokenized_datasets (dict) dictionary containing tokenized train and validation datasets
     OUTPUT: trainer (transformers.Trainer) trainer object
     """
@@ -344,7 +344,7 @@ def train_and_save_model(args, config_dict, trainer):
 
 
 def main(args):
-    # GPT2 Fine-tuning pipeline
+    # LM Fine-tuning pipeline
     # --- check cuda availability
     check_cuda(args)
     # --- Load yaml using args.config
