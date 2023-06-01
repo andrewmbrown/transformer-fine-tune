@@ -41,7 +41,7 @@ hyperparameters:
   epochs: 2
   warmup_steps: 100
   epsilon: 1e-7
-  batch_size: 16
+  batch_size: 4
   sample_every: 100
   seed: 42
   weight_decay: 0.01
