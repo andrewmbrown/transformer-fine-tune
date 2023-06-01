@@ -15,6 +15,7 @@ eval_accumulation_steps: 100
 eval_batch_size: 1
 predict_with_generate: false
 generation_max_length: 200
+compute_metrics: false
 save_total_limit: 3
 use_early_stopping: true
 load_best_model_at_end: true  # has to be true alongside early stopping
