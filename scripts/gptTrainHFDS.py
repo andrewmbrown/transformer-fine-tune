@@ -19,7 +19,7 @@ import torch
 import evaluate  # hf evaluation library
 import deepspeed
 from torch.utils.data import Dataset, DataLoader, random_split, RandomSampler, SequentialSampler
-from transformers import Trainer, TrainingArguments, AutoConfig, AutoModel, AutoModelForCasualLM, AutoTokenizer
+from transformers import Trainer, TrainingArguments, AutoConfig, AutoModel, AutoModelForCausalLM, AutoTokenizer
 from transformers import AdamW, get_linear_schedule_with_warmup, DataCollatorForLanguageModeling
 from transformers import Seq2SeqTrainingArguments, Seq2SeqTrainer, EarlyStoppingCallback
 from datasets import load_dataset
@@ -90,14 +90,14 @@ def init_model(args, config_dict, tokenizer):
     INPUT:  args (argparse.ArgumentParser)
             config_dict (dict) dictionary containing training configs
             tokenizer (AutoTokenizer) tokenizer for LM model
-    OUTPUT: model (AutoModelForCasualLM) LM model
+    OUTPUT: model (AutoModelForCausalLM) LM model
     """
     assert config_dict['model_name'] is not None, "ERROR: Please provide a model name"
     assert args.device is not None, "ERROR: Please provide a device (cpu/gpu/etc) to mount model"
     # Load LM configuration
     config = AutoConfig.from_pretrained(config_dict['model_name'], output_hidden_states=False)
     # instantiate model
-    model = AutoModelForCasualLM.from_pretrained(config_dict['model_name'], config=config)
+    model = AutoModelForCausalLM.from_pretrained(config_dict['model_name'], config=config)
     # resize token embeddings for our custom tokens
     model.resize_token_embeddings(len(tokenizer))
     # move model to GPU (if available)
@@ -110,7 +110,7 @@ def load_optimizer(args, config_dict, model):
     DESC:   Load optimizer (currently only AdamW) TODO: add other optimizers
     INPUT:  args (argparse.ArgumentParser)
             config_dict (dict) dictionary containing training configs
-            model (AutoModelForCasualLM) LM model
+            model (AutoModelForCausalLM) LM model
     OUTPUT: optimizer (AdamW) AdamW optimizer
     """
     # Note: AdamW is a class from the huggingface library (as opposed to pytorch) 
@@ -232,7 +232,7 @@ def init_trainer(args, config_dict, model, tokenizer, train_tokenized_dataset, v
     DESC:   Initialize trainer object
     INPUT:  args (argparse.ArgumentParser)
             config_dict (dict) dictionary containing training configs
-            model (AutoModelForCasualLM) untrained AutoModelForCasualLM model
+            model (AutoModelForCausalLM) untrained AutoModelForCausalLM model
             tokenizer (AutoTokenizer) tokenizer for LM model
             tokenized_datasets (dict) dictionary containing tokenized train and validation datasets
     OUTPUT: trainer (transformers.Trainer) trainer object
