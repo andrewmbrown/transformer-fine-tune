@@ -1,27 +1,29 @@
 # hf settings
-model_name: gpt2-xl
+model_name: gpt2
 data_train_path: /home/ubuntu/transformer-fine-tune/data/instruct-reflections/train-echo.csv
-deepspeed_config_path: /home/ubuntu/transformer-fine-tune/configs/ds_config_zero3.json
+deepspeed_config_path: /home/ubuntu/transformer-fine-tune/configs/ds_config_zero2.json
 data_validation_path: /home/ubuntu/transformer-fine-tune/data/instruct-reflections/validation-echo.csv
 output_data_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-xl-echo
 output_model_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-xl-echo
 output_tokenizer_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-xl-echo
 logging_dir: /home/ubuntu/transformer-fine-tune/logs/
-logging_steps: 100
+logging_steps: 10
 logging_strategy: steps
 evaluation_strategy: steps
-eval_steps: 500
-eval_accumulation_steps: 100
+eval_steps: 10
 eval_batch_size: 1
 predict_with_generate: false
+eval_accumulation_steps: 100
 generation_max_length: 200
 compute_metrics: false
 save_total_limit: 3
+save_steps: 10
 use_early_stopping: true
 load_best_model_at_end: true  # has to be true alongside early stopping
 early_stopping_patience: 3
 metric_for_best_model: eval_loss
 greater_is_better: false  # we want the lowest possible eval_loss
+set_seed: false
 
 # wandb settings
 experiment_name: echo
@@ -36,9 +38,9 @@ hyperparameters:
   fp16: true
   bf16: true
   deepspeed: true
-  grad_accumulation_steps: 2
+  gradient_accumulation_steps: 2
   learning_rate: 0.0003
-  epochs: 2
+  epochs: 6
   warmup_steps: 100
   epsilon: 1e-7
   batch_size: 4

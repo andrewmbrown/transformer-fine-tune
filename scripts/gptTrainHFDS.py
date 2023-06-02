@@ -95,8 +95,10 @@ def init_model(args, config_dict, tokenizer):
     assert config_dict['model_name'] is not None, "ERROR: Please provide a model name"
     assert args.device is not None, "ERROR: Please provide a device (cpu/gpu/etc) to mount model"
     # Load LM configuration
+    print(f"Loading {config_dict['model_name']} config")
     config = AutoConfig.from_pretrained(config_dict['model_name'], output_hidden_states=False)
     # instantiate model
+    print(f"Loading {config_dict['model_name']} pretrained model")
     model = AutoModelForCausalLM.from_pretrained(config_dict['model_name'], config=config)
     # resize token embeddings for our custom tokens
     model.resize_token_embeddings(len(tokenizer))
@@ -255,11 +257,13 @@ def init_trainer(args, config_dict, model, tokenizer, train_tokenized_dataset, v
                                         predict_with_generate=config_dict['predict_with_generate'],
                                         generation_max_length=config_dict['generation_max_length'],
                                         save_total_limit=config_dict['save_total_limit'],
+                                        save_steps=config_dict['save_steps'],
                                         metric_for_best_model=config_dict['metric_for_best_model'],
                                         load_best_model_at_end=config_dict['load_best_model_at_end'],
                                         per_device_eval_batch_size=config_dict["eval_batch_size"],
                                         per_device_train_batch_size=config_dict['hyperparameters']["batch_size"],
-                                        bf16=config_dict['hyperparameters']['bf16'],
+                                        gradient_accumulation_steps=config_dict['hyperparameters']["gradient_accumulation_steps"],
+                                        fp16=config_dict['hyperparameters']['bf16'],
                                         num_train_epochs=config_dict['hyperparameters']["epochs"],
                                         learning_rate=config_dict['hyperparameters']["learning_rate"],
                                         weight_decay=config_dict['hyperparameters']["weight_decay"],
@@ -281,6 +285,7 @@ def init_trainer(args, config_dict, model, tokenizer, train_tokenized_dataset, v
                                         load_best_model_at_end=config_dict['load_best_model_at_end'],
                                         per_device_eval_batch_size=config_dict["eval_batch_size"],
                                         per_device_train_batch_size=config_dict['hyperparameters']["batch_size"],
+                                        gradient_accumulation_steps=config_dict['hyperparameters']["gradient_accumulation_steps"],
                                         bf16=config_dict['hyperparameters']['bf16'],
                                         num_train_epochs=config_dict['hyperparameters']["epochs"],
                                         learning_rate=config_dict['hyperparameters']["learning_rate"],
@@ -396,6 +401,10 @@ if __name__ == "__main__":
     parser.add_argument("--dont_use_wandb", action='store_false', help="Path to Wandb key for logging training stats", required=False)
     parser.add_argument("--use_deepspeed", action='store_true', help="Option - use deepspeed during training", required=False)
     parser.add_argument("--dont_use_deepspeed", action='store_false', help="Option - don't use deepspeed during training", required=False)
+
+    parser.add_argument("--local_rank", type=int, default=0)
+    local_rank = int(os.environ["LOCAL_RANK"])
+
     parser.set_defaults(feature=True)
 
     global args  # set global args scope potential for gpu diagnostics

@@ -45,13 +45,16 @@ def set_seed(args, config_dict):
             config_dict (dict) dictionary containing yaml file
     OUTPUT: None
     """
-    assert config_dict['hyperparameters']['seed'] is not None, "ERROR: Please provide a seed value"
-    random.seed(config_dict['hyperparameters']['seed'])
-    np.random.seed(config_dict['hyperparameters']['seed'])
-    torch.manual_seed(config_dict['hyperparameters']['seed'])
-    if args.n_gpu > 0:
-        torch.cuda.manual_seed_all(config_dict['hyperparameters']['seed'])
-    print(f"Set all seeds to {config_dict['hyperparameters']['seed']}")
+    if config_dict['set_seed']:
+        assert config_dict['hyperparameters']['seed'] is not None, "ERROR: Please provide a seed value"
+        random.seed(config_dict['hyperparameters']['seed'])
+        np.random.seed(config_dict['hyperparameters']['seed'])
+        torch.manual_seed(config_dict['hyperparameters']['seed'])
+        if args.n_gpu > 0:
+            torch.cuda.manual_seed_all(config_dict['hyperparameters']['seed'])
+        print(f"Set all seeds to {config_dict['hyperparameters']['seed']}")
+    else:
+        print("WARNING: Set Seed set to false, not setting seed")
     return
 
 
