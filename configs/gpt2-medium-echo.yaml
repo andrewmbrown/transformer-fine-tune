@@ -28,7 +28,7 @@ set_seed: false  # do not set seeds to constant value
 
 # wandb settings
 experiment_name: echo
-wandb_project_name: gpt2-reflector-echo-sweep
+wandb_project_name: gpt2-reflector-echo-jun4
 wandb_notes: Complete gpt-2 run (GPT2Medium) reflector trained on echo data (alpaca like data), with early stopping and bigger batch size
 wandb_tags: GPT2-medium, reflector, instruct, echo
 
