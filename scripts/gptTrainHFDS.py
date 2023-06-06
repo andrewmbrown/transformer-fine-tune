@@ -103,7 +103,7 @@ def init_model(args, config_dict, tokenizer):
     # resize token embeddings for our custom tokens
     model.resize_token_embeddings(len(tokenizer))
     # move model to GPU (if available)
-    model.to(args.device)
+    # model.to(args.device)
     return model
 
 
@@ -250,7 +250,7 @@ def init_trainer(args, config_dict, model, tokenizer, train_tokenized_dataset, v
                                         evaluation_strategy=config_dict['evaluation_strategy'],
                                         eval_steps=config_dict["eval_steps"],
                                         eval_accumulation_steps=config_dict["eval_accumulation_steps"],
-                                        gradient_checkpointing=config_dict['gradient_checkpointing'],
+                                        # gradient_checkpointing=config_dict['gradient_checkpointing'],
                                         deepspeed=config_dict['deepspeed_config_path'],
                                         logging_dir=config_dict['logging_dir'],
                                         logging_strategy=config_dict['logging_strategy'],
@@ -262,6 +262,7 @@ def init_trainer(args, config_dict, model, tokenizer, train_tokenized_dataset, v
                                         metric_for_best_model=config_dict['metric_for_best_model'],
                                         load_best_model_at_end=config_dict['load_best_model_at_end'],
                                         per_device_eval_batch_size=config_dict["eval_batch_size"],
+                                        # lr_scheduler_type=config_dict['lr_scheduler_type'],
                                         per_device_train_batch_size=config_dict['hyperparameters']["batch_size"],
                                         gradient_accumulation_steps=config_dict['hyperparameters']["gradient_accumulation_steps"],
                                         bf16=config_dict['hyperparameters']['bf16'],
@@ -276,12 +277,14 @@ def init_trainer(args, config_dict, model, tokenizer, train_tokenized_dataset, v
                                         evaluation_strategy=config_dict['evaluation_strategy'],
                                         eval_steps=config_dict["eval_steps"],
                                         eval_accumulation_steps=config_dict["eval_accumulation_steps"],
+                                        gradient_checkpointing=config_dict['gradient_checkpointing'],
                                         logging_dir=config_dict['logging_dir'],
                                         logging_strategy=config_dict['logging_strategy'],
                                         logging_steps=config_dict['logging_steps'],
                                         predict_with_generate=config_dict['predict_with_generate'],
                                         generation_max_length=config_dict['generation_max_length'],
                                         save_total_limit=config_dict['save_total_limit'],
+                                        save_steps=config_dict['save_steps'],
                                         metric_for_best_model=config_dict['metric_for_best_model'],
                                         load_best_model_at_end=config_dict['load_best_model_at_end'],
                                         per_device_eval_batch_size=config_dict["eval_batch_size"],
@@ -404,7 +407,7 @@ if __name__ == "__main__":
     parser.add_argument("--dont_use_deepspeed", action='store_false', help="Option - don't use deepspeed during training", required=False)
 
     parser.add_argument("--local_rank", type=int, default=0)
-    local_rank = int(os.environ["LOCAL_RANK"])
+    # local_rank = int(os.environ["LOCAL_RANK"])
 
     parser.set_defaults(feature=True)
 
