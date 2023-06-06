@@ -1,0 +1,61 @@
+# hf settings
+# GPT-2 SWEEP - Experiment: 1
+model_name: gpt2-xl
+data_train_path: /home/ubuntu/transformer-fine-tune/data/instruct-reflections/train-echo.csv
+deepspeed_config_path: /home/ubuntu/transformer-fine-tune/configs/ds_config_zero2.json
+data_validation_path: /home/ubuntu/transformer-fine-tune/data/instruct-reflections/validation-echo.csv
+output_data_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-xl-exp4
+output_model_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-xl-exp4
+output_tokenizer_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-xl-exp4
+logging_dir: /home/ubuntu/transformer-fine-tune/logs/
+logging_steps: 10
+logging_strategy: steps
+evaluation_strategy: steps
+eval_steps: 10
+eval_batch_size: 2
+predict_with_generate: false
+eval_accumulation_steps: 100
+generation_max_length: 200
+compute_metrics: false
+save_total_limit: 1
+save_steps: 10
+use_early_stopping: true
+load_best_model_at_end: true  # has to be true alongside early stopping
+early_stopping_patience: 2
+early_stopping_threshold: 0.06
+metric_for_best_model: eval_loss
+greater_is_better: false  # we want the lowest possible eval_loss
+set_seed: true  # set seed for reproducability on sweep
+
+# wandb settings
+experiment_name: echo
+wandb_project_name: gpt2-xl-echo-sweep
+wandb_notes: Complete gpt-2 sweep (GPT2xl) reflector trained on echo data (alpaca like data) finding best hyperparameters
+wandb_name: Experiment 4
+wandb_tags: GPT2-xl, reflector, instruct, echo
+
+# hyperparameter settings
+hyperparameters:
+  find_hyperparams_automatically: false
+  num_trials: 10
+  fp16: true
+  bf16: true
+  deepspeed: true
+  gradient_accumulation_steps: 1
+  learning_rate: 0.001
+  epochs: 4
+  warmup_steps: 100
+  epsilon: 1e-7
+  batch_size: 4
+  sample_every: 100
+  seed: 42
+  weight_decay: 0.0
+
+# inference settings
+refgen:
+  max_length: 300
+  temperature: 0.6
+  repetition_penalty: 1.1
+  do_sample: true
+  top_k: 100
+  top_p: 1
