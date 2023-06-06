@@ -112,7 +112,7 @@ def init_wandb(args, config_dict):
                 project=config_dict["wandb_project_name"],
                 notes=config_dict["wandb_notes"],
                 config=config_dict,
-                name=config_dict["wandb_name"] if config_dict["wandb_name"] is not None else None,
+                group=config_dict["wandb_group"] if config_dict["wandb_group"] is not None else None,
                 tags=config_dict["wandb_tags"])
             print("wand login and init successful, logging run!")
         except:

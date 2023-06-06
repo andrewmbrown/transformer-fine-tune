@@ -31,7 +31,7 @@ set_seed: true  # set seed for reproducability on sweep
 experiment_name: echo
 wandb_project_name: gpt2-medium-echo-sweep
 wandb_notes: Complete gpt-2 sweep (medium) reflector trained on echo data (alpaca like data) finding best hyperparameters
-wandb_name: Experiment 5
+wandb_group: Experiment 5
 wandb_tags: GPT2-medium, reflector, instruct, echo
 
 # hyperparameter settings
