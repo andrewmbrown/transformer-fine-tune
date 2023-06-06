@@ -1,11 +1,11 @@
 # hf settings
-model_name: gpt2-xl
+model_name: gpt2
 data_train_path: /home/ubuntu/transformer-fine-tune/data/instruct-reflections/train-echo.csv
-deepspeed_config_path: /home/ubuntu/transformer-fine-tune/configs/ds_config_zero2.json
+deepspeed_config_path: /home/ubuntu/transformer-fine-tune/configs/ds_config_zero3.json
 data_validation_path: /home/ubuntu/transformer-fine-tune/data/instruct-reflections/validation-echo.csv
-output_data_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-xl-echo
-output_model_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-xl-echo
-output_tokenizer_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-xl-echo
+output_data_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-small-echo
+output_model_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-small-echo
+output_tokenizer_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-small-echo
 logging_dir: /home/ubuntu/transformer-fine-tune/logs/
 logging_steps: 10
 logging_strategy: steps
@@ -22,30 +22,30 @@ save_steps: 10
 use_early_stopping: true
 load_best_model_at_end: true  # has to be true alongside early stopping
 early_stopping_patience: 2
+early_stopping_threshold: 0.06
 metric_for_best_model: eval_loss
 greater_is_better: false  # we want the lowest possible eval_loss
-set_seed: false
+set_seed: false  # do not set seeds to constant value
 
 # wandb settings
 experiment_name: echo
-wandb_project_name: gpt2-reflector-echo-jun4
-wandb_notes: Complete gpt-2 family run - gpt-2 XL reflector trained on echo data (alpaca like data), trying larger batches with early stopping
-wandb_tags: GPT2-xl, reflector, instruct, echo
+wandb_project_name: gpt2-reflector-echo-experiment
+wandb_notes: Complete gpt-2 run (GPT2Small) reflector trained on echo data (alpaca like data), with early stopping and bigger batch size
+wandb_tags: GPT2-small, reflector, instruct, echo
 
 # hyperparameter settings
 hyperparameters:
   find_hyperparams_automatically: false
-  lr_scheduler_type: cosine
   num_trials: 10
   fp16: true
   bf16: true
   deepspeed: true
-  gradient_accumulation_steps: 8
+  gradient_accumulation_steps: 2
   learning_rate: 0.0003
   epochs: 7
   warmup_steps: 100
   epsilon: 1e-7
-  batch_size: 1
+  batch_size: 4
   sample_every: 100
   seed: 42
   weight_decay: 0.01

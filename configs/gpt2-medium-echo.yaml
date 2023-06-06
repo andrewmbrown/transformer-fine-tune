@@ -21,7 +21,7 @@ save_steps: 10
 use_early_stopping: true
 load_best_model_at_end: true  # has to be true alongside early stopping
 early_stopping_patience: 2
-early_stopping_threshold: 0.06
+early_stopping_threshold: 0.10
 metric_for_best_model: eval_loss
 greater_is_better: false  # we want the lowest possible eval_loss
 set_seed: false  # do not set seeds to constant value

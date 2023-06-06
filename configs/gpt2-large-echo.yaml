@@ -1,7 +1,7 @@
 # hf settings
 model_name: gpt2-large
 data_train_path: /home/ubuntu/transformer-fine-tune/data/instruct-reflections/train-echo.csv
-deepspeed_config_path: /home/ubuntu/transformer-fine-tune/configs/ds_config_zero2.json
+deepspeed_config_path: /home/ubuntu/transformer-fine-tune/configs/ds_config_zero3.json
 data_validation_path: /home/ubuntu/transformer-fine-tune/data/instruct-reflections/validation-echo.csv
 output_data_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-large-echo
 output_model_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-large-echo
@@ -14,6 +14,7 @@ eval_steps: 10
 eval_batch_size: 1
 predict_with_generate: false
 eval_accumulation_steps: 100
+gradient_checkpointing: true
 generation_max_length: 200
 compute_metrics: false
 save_total_limit: 3
