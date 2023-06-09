@@ -38,15 +38,20 @@
 # deepspeed scripts/gptTrainHFDS.py -c /home/ubuntu/transformer-fine-tune/configs/gpt2-large/gpt2-large-exp7.yaml --save_model --save_tokenizer --dont_save_arguments --use_deepspeed --use_wandb
 # deepspeed scripts/gptTrainHFDS.py -c /home/ubuntu/transformer-fine-tune/configs/gpt2-large/gpt2-large-exp8.yaml --save_model --save_tokenizer --dont_save_arguments --use_deepspeed --use_wandb
 
-deepspeed scripts/gptTrainHFDS.py -c /home/ubuntu/transformer-fine-tune/configs/gpt2-xl/gpt2-xl-exp8.yaml --save_model --save_tokenizer --dont_save_arguments --use_deepspeed --use_wandb
-deepspeed scripts/gptTrainHFDS.py -c /home/ubuntu/transformer-fine-tune/configs/gpt2-xl/gpt2-xl-exp1.yaml --save_model --save_tokenizer --dont_save_arguments --use_deepspeed --use_wandb
-deepspeed scripts/gptTrainHFDS.py -c /home/ubuntu/transformer-fine-tune/configs/gpt2-xl/gpt2-xl-exp2.yaml --save_model --save_tokenizer --dont_save_arguments --use_deepspeed --use_wandb
-deepspeed scripts/gptTrainHFDS.py -c /home/ubuntu/transformer-fine-tune/configs/gpt2-xl/gpt2-xl-exp3.yaml --save_model --save_tokenizer --dont_save_arguments --use_deepspeed --use_wandb
-deepspeed scripts/gptTrainHFDS.py -c /home/ubuntu/transformer-fine-tune/configs/gpt2-xl/gpt2-xl-exp4.yaml --save_model --save_tokenizer --dont_save_arguments --use_deepspeed --use_wandb
-deepspeed scripts/gptTrainHFDS.py -c /home/ubuntu/transformer-fine-tune/configs/gpt2-xl/gpt2-xl-exp5.yaml --save_model --save_tokenizer --dont_save_arguments --use_deepspeed --use_wandb
-deepspeed scripts/gptTrainHFDS.py -c /home/ubuntu/transformer-fine-tune/configs/gpt2-xl/gpt2-xl-exp6.yaml --save_model --save_tokenizer --dont_save_arguments --use_deepspeed --use_wandb
-deepspeed scripts/gptTrainHFDS.py -c /home/ubuntu/transformer-fine-tune/configs/gpt2-xl/gpt2-xl-exp7.yaml --save_model --save_tokenizer --dont_save_arguments --use_deepspeed --use_wandb
+# deepspeed scripts/gptTrainHFDS.py -c /home/ubuntu/transformer-fine-tune/configs/gpt2-xl/gpt2-xl-exp8.yaml --save_model --save_tokenizer --dont_save_arguments --use_deepspeed --use_wandb
+# deepspeed scripts/gptTrainHFDS.py -c /home/ubuntu/transformer-fine-tune/configs/gpt2-xl/gpt2-xl-exp1.yaml --save_model --save_tokenizer --dont_save_arguments --use_deepspeed --use_wandb
+# deepspeed scripts/gptTrainHFDS.py -c /home/ubuntu/transformer-fine-tune/configs/gpt2-xl/gpt2-xl-exp2.yaml --save_model --save_tokenizer --dont_save_arguments --use_deepspeed --use_wandb
+# deepspeed scripts/gptTrainHFDS.py -c /home/ubuntu/transformer-fine-tune/configs/gpt2-xl/gpt2-xl-exp3.yaml --save_model --save_tokenizer --dont_save_arguments --use_deepspeed --use_wandb
+# deepspeed scripts/gptTrainHFDS.py -c /home/ubuntu/transformer-fine-tune/configs/gpt2-xl/gpt2-xl-exp4.yaml --save_model --save_tokenizer --dont_save_arguments --use_deepspeed --use_wandb
+# deepspeed scripts/gptTrainHFDS.py -c /home/ubuntu/transformer-fine-tune/configs/gpt2-xl/gpt2-xl-exp5.yaml --save_model --save_tokenizer --dont_save_arguments --use_deepspeed --use_wandb
+# deepspeed scripts/gptTrainHFDS.py -c /home/ubuntu/transformer-fine-tune/configs/gpt2-xl/gpt2-xl-exp6.yaml --save_model --save_tokenizer --dont_save_arguments --use_deepspeed --use_wandb
+# deepspeed scripts/gptTrainHFDS.py -c /home/ubuntu/transformer-fine-tune/configs/gpt2-xl/gpt2-xl-exp7.yaml --save_model --save_tokenizer --dont_save_arguments --use_deepspeed --use_wandb
 
 # deepspeed scripts/gptTrainHFDS.py -c /home/ubuntu/transformer-fine-tune/configs/gpt2-medium-echo.yaml --save_model --save_tokenizer --dont_save_arguments --use_deepspeed --use_wandb
 # deepspeed scripts/gptTrainHFDS.py -c /home/ubuntu/transformer-fine-tune/configs/gpt2-large-echo.yaml --save_model --save_tokenizer --dont_save_arguments --use_deepspeed --use_wandb
 # deepspeed scripts/gptTrainHFDS.py -c /home/ubuntu/transformer-fine-tune/configs/gpt2-xl-echo.yaml --save_model --save_tokenizer --dont_save_arguments --use_deepspeed --use_wandb
+
+deepspeed scripts/gptTrainHFDS.py -c /home/ubuntu/transformer-fine-tune/configs/gpt2-small/gpt2-small-exp5-complex.yaml --save_model --save_tokenizer --dont_save_arguments --use_deepspeed --use_wandb
+deepspeed scripts/gptTrainHFDS.py -c /home/ubuntu/transformer-fine-tune/configs/gpt2-medium/gpt2-medium-exp7-complex.yaml --save_model --save_tokenizer --dont_save_arguments --use_deepspeed --use_wandb
+deepspeed scripts/gptTrainHFDS.py -c /home/ubuntu/transformer-fine-tune/configs/gpt2-large/gpt2-large-exp7-complex.yaml --save_model --save_tokenizer --dont_save_arguments --use_deepspeed --use_wandb
+deepspeed scripts/gptTrainHFDS.py -c /home/ubuntu/transformer-fine-tune/configs/gpt2-xl/gpt2-xl-exp7-complex.yaml --save_model --save_tokenizer --dont_save_arguments --use_deepspeed --use_wandb
