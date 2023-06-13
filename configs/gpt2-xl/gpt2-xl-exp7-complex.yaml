@@ -1,7 +1,7 @@
 # hf settings
 # GPT-2 SWEEP - Experiment: 1
 model_name: gpt2-xl
-data_train_path: /home/ubuntu/transformer-fine-tune/data/complex-instruct-reflections/compelxtrain-echo.csv
+data_train_path: /home/ubuntu/transformer-fine-tune/data/complex-instruct-reflections/complextrain-echo.csv
 deepspeed_config_path: /home/ubuntu/transformer-fine-tune/configs/ds_config_zero2.json
 data_validation_path: /home/ubuntu/transformer-fine-tune/data/complex-instruct-reflections/complexvalidation-echo.csv
 output_data_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-xl-complex
@@ -31,6 +31,7 @@ set_seed: true  # set seed for reproducability on sweep
 experiment_name: echo
 wandb_project_name: gpt2-family-complex
 wandb_notes: Training gpt-2-xl for complex reflections (GPT2XL), echo style data with gpt4 complex reflections
+wandb_group: GPT2-xl
 wandb_tags: GPT2-xl, complex-reflector, instruct, echo
 
 # hyperparameter settings

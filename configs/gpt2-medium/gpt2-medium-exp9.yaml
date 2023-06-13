@@ -1,11 +1,12 @@
 # hf settings
-model_name: gpt2
-data_train_path: /home/ubuntu/transformer-fine-tune/data/complex-instruct-reflections/complextrain-echo.csv
+# GPT-2 SWEEP - Experiment: 1
+model_name: gpt2-medium
+data_train_path: /home/ubuntu/transformer-fine-tune/data/instruct-reflections/train-echo.csv
 deepspeed_config_path: /home/ubuntu/transformer-fine-tune/configs/ds_config_zero2.json
-data_validation_path: /home/ubuntu/transformer-fine-tune/data/complex-instruct-reflections/complexvalidation-echo.csv
-output_data_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-small-complex
-output_model_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-small-complex
-output_tokenizer_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-small-complex
+data_validation_path: /home/ubuntu/transformer-fine-tune/data/instruct-reflections/validation-echo.csv
+output_data_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-medium-exp9
+output_model_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-medium-exp9
+output_tokenizer_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-medium-exp9
 logging_dir: /home/ubuntu/transformer-fine-tune/logs/
 logging_steps: 10
 logging_strategy: steps
@@ -28,10 +29,10 @@ set_seed: true  # set seed for reproducability on sweep
 
 # wandb settings
 experiment_name: echo
-wandb_project_name: gpt2-family-complex
-wandb_notes: Training gpt-2 for complex reflections (GPT2Small), echo style data with gpt4 complex reflections
-wandb_group: GPT2-Small
-wandb_tags: GPT2-small, complex-reflector, instruct, echo
+wandb_project_name: gpt2-medium-echo-sweep
+wandb_notes: Complete gpt-2 sweep (medium) reflector trained on echo data (alpaca like data) finding best hyperparameters
+wandb_group: Experiment 9
+wandb_tags: GPT2-medium, reflector, instruct, echo
 
 # hyperparameter settings
 hyperparameters:
@@ -40,12 +41,12 @@ hyperparameters:
   fp16: true
   bf16: true
   deepspeed: true
-  gradient_accumulation_steps: 2
-  learning_rate: 0.0005
+  gradient_accumulation_steps: 1
+  learning_rate: 0.00005
   epochs: 4
   warmup_steps: 100
   epsilon: 1e-7
-  batch_size: 4
+  batch_size: 2
   sample_every: 100
   seed: 42
   weight_decay: 0.0
