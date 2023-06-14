@@ -1,9 +1,9 @@
 # hf settings
 # GPT-2 SWEEP - Experiment: 6
 model_name: gpt2-large
-data_train_path: /home/ubuntu/transformer-fine-tune/data/instruct-reflections/complextrain-echo.csv
+data_train_path: /home/ubuntu/transformer-fine-tune/data/complex-instruct-reflections/complextrain-echo.csv
 deepspeed_config_path: /home/ubuntu/transformer-fine-tune/configs/ds_config_zero2.json
-data_validation_path: /home/ubuntu/transformer-fine-tune/data/instruct-reflections/complexvalidation-echo.csv
+data_validation_path: /home/ubuntu/transformer-fine-tune/data/complex-instruct-reflections/complexvalidation-echo.csv
 output_data_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-complex-large-exp6
 output_model_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-complex-large-exp6
 output_tokenizer_dir: /home/ubuntu/transformer-fine-tune/models/gpt2-complex-large-exp6
