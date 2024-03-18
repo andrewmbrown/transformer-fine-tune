@@ -2,6 +2,13 @@ Repository containing code for training/finetuning HuggingFace transformers with
 
 I created this repository to fine-tune huggingface LMs in a distributed environment with DeepSpeed (as an .ipynb file does not allow you to do such)
 
+## EACL Paper Disclaimer ## 
+
+If you're coming from the paper: Generation, Distillation and Evaluation of Motivational Interviewing-Style
+Reflections with a Foundational Language Model (https://aclanthology.org/2024.eacl-long.75.pdf), welcome!
+
+This code was used to train and test the distilled reflection models explained in that paper. Feel free to email me at andrew.brown.csf@gmail.com if you have any questions related to this.
+
 ## Quick Start ##
 1. Create a config in the configs/ directory for the type of model you want to train (use a previous config to create yours)
 2. Configure scripts/run.sh bash script to include your config and some desired flags for trainHFDS.py (I use the run.sh to set up hyperparamter sweeps so I can queue all the jobs in a background environment)
